@@ -8,18 +8,18 @@
     <fragment
         android:id="@+id/navigation_home"
         android:name="edu.utap.sharein.ui.home.HomeFragment"
-        android:label="@string/title_home"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="edu.utap.sharein.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_new_post"
+        android:name="edu.utap.sharein.ui.newpost.NewPostFragment"
+        android:label="@string/title_newPost"
+        tools:layout="@layout/fragment_new_post" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="edu.utap.sharein.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_profile"
+        android:name="edu.utap.sharein.ui.notifications.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile" />
 </navigation>
