@@ -123,7 +123,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/cameraBut"
         android:text="Camera"
-       
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         style="?android:attr/buttonBarButtonStyle"

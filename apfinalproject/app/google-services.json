@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "383224950261",
+    "firebase_url": "https://sharein-a165f.firebaseio.com",
+    "project_id": "sharein-a165f",
+    "storage_bucket": "sharein-a165f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383224950261:android:1861e159c03c96a25084bc",
+        "android_client_info": {
+          "package_name": "edu.utap.sharein"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "383224950261-uchp6s4c7q97bn8t3kf6bbpvktj3qj4o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.utap.sharein",
+            "certificate_hash": "b809de4fb8441cb2b7cf7ffb50e01f4ce02ace17"
+          }
+        },
+        {
+          "client_id": "383224950261-ardjrcf18ok8a93a6u5865jimi2pd5m2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKljzqnWCroV2uVBDkYIa5rWdAElai6AU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "383224950261-ardjrcf18ok8a93a6u5865jimi2pd5m2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
