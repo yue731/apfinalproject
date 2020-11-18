@@ -96,38 +96,38 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tagTV"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/cancelBut"
-        android:text="Cancel"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/cancelBut"-->
+<!--        android:text="Cancel"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
 
-        style="?android:attr/buttonBarButtonStyle"
-        android:textColor="@android:color/darker_gray"/>
+<!--        style="?android:attr/buttonBarButtonStyle"-->
+<!--        android:textColor="@android:color/darker_gray"/>-->
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/postBut"
-        android:text="Post"
-        app:layout_constraintStart_toEndOf="@id/cancelBut"
-        app:layout_constraintEnd_toStartOf="@+id/cameraBut"
-        app:layout_constraintBottom_toBottomOf="parent"
-        style="?android:attr/buttonBarButtonStyle"
-        android:textColor="@android:color/darker_gray"/>
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/postBut"-->
+<!--        android:text="Post"-->
+<!--        app:layout_constraintStart_toEndOf="@id/cancelBut"-->
+<!--        app:layout_constraintEnd_toStartOf="@+id/cameraBut"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        style="?android:attr/buttonBarButtonStyle"-->
+<!--        android:textColor="@android:color/darker_gray"/>-->
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/cameraBut"
-        android:text="Camera"
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/cameraBut"-->
+<!--        android:text="Camera"-->
 
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        style="?android:attr/buttonBarButtonStyle"
-        android:textColor="@android:color/darker_gray"/>
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        style="?android:attr/buttonBarButtonStyle"-->
+<!--        android:textColor="@android:color/darker_gray"/>-->
 
 
 

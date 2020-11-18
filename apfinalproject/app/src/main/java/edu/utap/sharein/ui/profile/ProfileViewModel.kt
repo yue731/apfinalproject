@@ -1,7 +1,5 @@
-package edu.utap.sharein.ui.notifications
+package edu.utap.sharein.ui.profile
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class ProfileViewModel : ViewModel() {

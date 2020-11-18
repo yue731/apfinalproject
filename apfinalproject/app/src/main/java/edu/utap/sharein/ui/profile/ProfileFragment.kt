@@ -1,4 +1,4 @@
-package edu.utap.sharein.ui.notifications
+package edu.utap.sharein.ui.profile
 
 import android.app.Activity
 import android.content.Intent
@@ -14,10 +14,8 @@ import androidx.navigation.ActionOnlyNavDirections
 import androidx.navigation.fragment.findNavController
 import com.firebase.ui.auth.IdpResponse
 import edu.utap.sharein.AuthInitActivity
-import edu.utap.sharein.MainActivity
 import edu.utap.sharein.MainViewModel
 import edu.utap.sharein.R
-import edu.utap.sharein.ui.home.HomeFragment
 
 class ProfileFragment : Fragment() {
     companion object {

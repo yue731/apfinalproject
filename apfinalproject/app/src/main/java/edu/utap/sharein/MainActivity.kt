@@ -45,11 +45,11 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        // inflate the menu: add items to action bar
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        // inflate the menu: add items to action bar
+//        menuInflater.inflate(R.menu.main_menu, menu)
+//        return true
+//    }
 
     private fun initUserUI() {
         viewModel.observeFirebaseAuthLiveData().observe(this, Observer {
