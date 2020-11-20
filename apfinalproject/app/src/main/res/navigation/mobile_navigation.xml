@@ -21,8 +21,17 @@
     <fragment
         android:id="@+id/navigation_new_post"
         android:name="edu.utap.sharein.ui.newpost.NewPostFragment"
-        android:label="@string/title_newPost"
-        tools:layout="@layout/fragment_new_post" />
+        android:label="{title}"
+        tools:layout="@layout/fragment_new_post" >
+        <argument
+            android:name="position"
+            app:argType="integer"
+            android:defaultValue="-1"/>
+        <argument
+            android:name="title"
+            app:argType="string"
+            android:defaultValue="New Post" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"

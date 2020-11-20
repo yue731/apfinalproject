@@ -8,6 +8,7 @@ data class Post(
     var name: String = "",
     var ownerUid: String = "",
     // Text
+    var title: String = "",
     var text: String = "",
     var pictureUUIDs: List<String> = listOf(),
     // Written on the server

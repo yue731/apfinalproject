@@ -1,7 +1,9 @@
 package edu.utap.sharein
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.Menu
 import androidx.activity.viewModels
@@ -16,6 +18,7 @@ import androidx.navigation.ui.setupWithNavController
 class MainActivity : AppCompatActivity() {
     companion object {
         const val rcSignIn = 17
+        const val cameraRC = 10
     }
 
     private val viewModel: MainViewModel by viewModels()
@@ -38,11 +41,34 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        // take photo intent
+        viewModel.setPhotoIntent(::takePhotoIntent)
+
+        // storage initialization
+        viewModel.firestoreInit(Storage())
+
+        // user authentication
         initUserUI()
         val authInitIntent = Intent(this, AuthInitActivity::class.java)
         startActivityForResult(authInitIntent, rcSignIn)
 
 
+
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when(requestCode) {
+            cameraRC -> {
+                if (resultCode == RESULT_OK) {
+                    viewModel.photoSuccess()
+                }
+                else{
+                    viewModel.photoFailure()
+                }
+            }
+        }
     }
 
 //    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -60,5 +86,12 @@ class MainActivity : AppCompatActivity() {
                 Log.d(javaClass.simpleName, "${it.displayName} ${it.email} ${it.uid} signed in")
             }
         })
+    }
+
+    private fun takePhotoIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also {
+            it.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.getPhotoURI())
+            startActivityForResult(it, cameraRC)
+        }
     }
 }

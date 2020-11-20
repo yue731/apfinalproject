@@ -8,9 +8,9 @@ import com.google.firebase.storage.StorageReference
 import java.io.File
 
 
-// store files in firebase storage
+// store images in firebase storage
 
-object Storage {
+class Storage {
     // create a storage reference from our app
     private val photoStorage: StorageReference = FirebaseStorage.getInstance().reference.child("images")
 
