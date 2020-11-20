@@ -13,7 +13,7 @@
         android:id="@+id/pic1IV"
         android:scaleType="centerInside"
         android:adjustViewBounds="true"
-        android:background="#0000000"
+
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -60,7 +60,25 @@
         app:layout_constraintStart_toEndOf="@id/userPhotoCV"
         app:layout_constraintBottom_toBottomOf="@id/userPhotoCV" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/likeIcon"
+        android:src="@drawable/ic_baseline_favorite_border_24"
+        app:layout_constraintBottom_toBottomOf="@+id/userNameSmall"
+        app:layout_constraintEnd_toStartOf="@+id/likesCount"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/likesCount"
+        android:text="00"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="@+id/likeIcon"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

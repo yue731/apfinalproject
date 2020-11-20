@@ -113,6 +113,14 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     fun signOut() {
         FirebaseAuth.getInstance().signOut()
     }
+
+    fun getUserName(): String? {
+        return FirebaseAuth.getInstance().currentUser?.displayName
+    }
+
+    fun getEmail(): String? {
+        return FirebaseAuth.getInstance().currentUser?.email
+    }
     ////////////////////////////////////////////////////////////////////////
 
 

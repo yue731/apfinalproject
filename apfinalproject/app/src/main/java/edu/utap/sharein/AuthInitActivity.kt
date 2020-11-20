@@ -35,6 +35,7 @@ class AuthInitActivity: AppCompatActivity() {
         }
         else {
             Log.d(javaClass.simpleName, "user ${FirebaseAuth.getInstance().currentUser?.displayName} email ${FirebaseAuth.getInstance().currentUser?.email}")
+            setDefaultDisplayNameByEmail()
             finish()
         }
     }
@@ -43,6 +44,7 @@ class AuthInitActivity: AppCompatActivity() {
      Set the default user display name by email
      */
     private fun setDefaultDisplayNameByEmail() {
+        Log.d(javaClass.simpleName, "set name by address called")
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {
             Log.d(javaClass.simpleName, "setDefaultDisplayNameByEmail current user null")
@@ -65,6 +67,9 @@ class AuthInitActivity: AppCompatActivity() {
                         }
 
                 }
+                else {
+                    Log.d(javaClass.simpleName, "displayname set to $displayName")
+                }
             }
         }
 
@@ -72,8 +77,11 @@ class AuthInitActivity: AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d(javaClass.simpleName, "activity result $resultCode")
         if (resultCode == rcSignIn) {
             val response = IdpResponse.fromResultIntent(data)
+
+
 
             if (resultCode == Activity.RESULT_OK) {
                 setDefaultDisplayNameByEmail()
@@ -84,8 +92,9 @@ class AuthInitActivity: AppCompatActivity() {
 
     override fun onResume() {
         Log.d(javaClass.simpleName, "auth resumed")
-        finish()
+
         super.onResume()
+        finish()
     }
 
     override fun onDestroy() {
