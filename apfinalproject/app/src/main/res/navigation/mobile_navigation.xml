@@ -14,7 +14,12 @@
             android:id="@+id/action_navigation_home_to_navigation_new_post"
             app:destination="@+id/navigation_new_post"
             app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit" />
+            app:exitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_navigation_home_to_navigation_one_post"
+            app:destination="@+id/navigation_one_post"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_close_exit"/>
 
     </fragment>
 
@@ -44,4 +49,26 @@
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
     </fragment>
+
+    <fragment
+        android:id="@+id/navigation_one_post"
+        android:name="edu.utap.sharein.OnePost"
+        android:label="Post"
+        tools:layout="@layout/one_post_view">
+        <argument
+            android:name="position"
+            app:argType="integer"
+            android:defaultValue="-1"/>
+        <argument
+            android:name="title"
+            app:argType="string"
+            android:defaultValue="Post" />
+        <action
+            android:id="@+id/action_navigation_one_post_to_navigation_home"
+            app:destination="@+id/navigation_home"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+
+    </fragment>
+
 </navigation>

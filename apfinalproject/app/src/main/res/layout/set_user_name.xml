@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/usernamePrompt"
+        android:text="Would you like to reset your user name?"
+        android:textSize="15sp"/>
+
+    <EditText
+        android:id="@+id/setUserNameET"
+        android:minLines="1"
+        android:background="@android:color/transparent"
+        android:textSize="15sp"/>
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal" >
+        <Button
+            android:id="@+id/cancelUserNameBut"
+            android:text="Cancel"
+            android:textSize="10sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/buttonBarButtonStyle"
+            android:textColor="@color/black"
+            android:gravity="center_horizontal"/>
+
+        <Button
+            android:id="@+id/setUserNameBut"
+            android:text="Submit"
+            android:textSize="10sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/buttonBarButtonStyle"
+            android:textColor="@color/black"
+            android:gravity="center_horizontal"/>
+
+    </TableRow>
+
+
+
+</TableLayout>

@@ -12,7 +12,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/userIDTV"
+        android:id="@+id/userNameTV"
         android:textSize="15sp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/profilePhotoIV" />
@@ -69,13 +69,43 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tagTV" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/onePostLikeIcon"
+        android:src="@drawable/ic_baseline_favorite_border_24"
+        app:layout_constraintTop_toBottomOf="@+id/locationTVInPostView"
+        app:layout_constraintEnd_toStartOf="@+id/onePostLikeCount"
+        android:layout_marginRight="2dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/onePostLikeCount"
+        android:text="0"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@id/onePostLikeIcon"
+
+        app:layout_constraintEnd_toStartOf="@+id/onePostComment"
+        android:layout_marginRight="5dp"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/onePostComment"
+        android:src="@drawable/ic_baseline_comment_24"
+        app:layout_constraintTop_toBottomOf="@+id/locationTVInPostView"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+
 
 
     <View
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/locationTVInPostView"
+        app:layout_constraintTop_toBottomOf="@id/onePostLikeIcon"
         android:background="#D3D3D3" />
 
     <TextView
@@ -85,7 +115,7 @@
         android:text="Comments"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/locationTVInPostView" />
+        app:layout_constraintTop_toBottomOf="@+id/onePostLikeIcon" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"

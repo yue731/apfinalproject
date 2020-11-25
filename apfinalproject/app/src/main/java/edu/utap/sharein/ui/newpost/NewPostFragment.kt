@@ -2,8 +2,10 @@ package edu.utap.sharein.ui.newpost
 
 
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -14,12 +16,14 @@ import edu.utap.sharein.ImageAdapter
 import edu.utap.sharein.MainViewModel
 import edu.utap.sharein.R
 import kotlinx.android.synthetic.main.fragment_new_post.*
+import java.util.*
 
 class NewPostFragment : Fragment() {
 
     private lateinit var newPostViewModel: NewPostViewModel
     private lateinit var imageAdapter: ImageAdapter
     private lateinit var pictureUUIDs: List<String>
+    private lateinit var musicUUID: String
     private var position = -1
     private val viewModel: MainViewModel by activityViewModels()
     private val args: NewPostFragmentArgs by navArgs()
@@ -48,12 +52,16 @@ class NewPostFragment : Fragment() {
         if (position == -1) {
             // new post
             pictureUUIDs = listOf()
+            // XXX update music info
+            musicUUID = ""
         }
         else {
             val post = viewModel.getPost(position)
             enterTitleET.text.insert(0, post.title)
             enterPostET.text.insert(0, post.text)
             pictureUUIDs = post.pictureUUIDs
+            // XXX update music info
+            musicUUID = ""
 
         }
         enterTitleET.requestFocus()
@@ -84,6 +92,17 @@ class NewPostFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.postBut -> {
+                // XXX post it
+                if (TextUtils.isEmpty(enterTitleET.text.toString())) {
+                    Toast.makeText(activity, "Enter title!", Toast.LENGTH_LONG).show()
+                }
+                else {
+                    if (position == -1) {
+                        // new post
+                        viewModel.createPost(enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicUUID)
+                    }
+                }
+                findNavController().popBackStack()
                 true
             }
             R.id.cameraBut -> {

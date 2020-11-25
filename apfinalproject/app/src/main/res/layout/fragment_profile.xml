@@ -46,7 +46,7 @@
             android:text="meow001"
             android:textSize="15sp"
             app:layout_constraintTop_toTopOf="@+id/profileContainer"
-            app:layout_constraintEnd_toStartOf="@+id/editName"
+            app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginRight="15dp"
             app:layout_constraintVertical_chainStyle="packed"/>
         <View
@@ -57,16 +57,7 @@
             android:background="#D3D3D3" />
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/editName"
-            android:text=">"
-            android:textSize="15sp"
-            app:layout_constraintTop_toTopOf="@+id/profileContainer"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginRight="5dp"
-            />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -82,7 +73,7 @@
             android:id="@+id/userId"
             android:text="1000000000"
             android:textSize="15sp"
-            app:layout_constraintTop_toBottomOf="@+id/editName"
+            app:layout_constraintTop_toBottomOf="@+id/userName"
             app:layout_constraintEnd_toEndOf="@id/userName" />
         <View
             android:layout_width="fill_parent"

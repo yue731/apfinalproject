@@ -1,17 +1,27 @@
 package edu.utap.sharein
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
+import android.view.LayoutInflater
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.ActionOnlyNavDirections
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
+import edu.utap.sharein.model.User
+import kotlinx.android.synthetic.main.set_user_name.*
 
 class AuthInitActivity: AppCompatActivity() {
+
+
     companion object {
         const val rcSignIn = 17
         val providers = arrayListOf(
@@ -50,7 +60,7 @@ class AuthInitActivity: AppCompatActivity() {
             Log.d(javaClass.simpleName, "setDefaultDisplayNameByEmail current user null")
 
         }
-        else if (user.displayName == null || user.displayName!!.isEmpty()) {
+        else if (user.displayName == null || user.displayName!!.isEmpty() || user.displayName!!.isBlank()) {
             user.apply {
                 val displayName = this.email?.substringBefore("@")
                 val profileUpdates = UserProfileChangeRequest.Builder()
@@ -75,16 +85,21 @@ class AuthInitActivity: AppCompatActivity() {
 
     }
 
+
+
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d(javaClass.simpleName, "activity result $resultCode")
-        if (resultCode == rcSignIn) {
-            val response = IdpResponse.fromResultIntent(data)
+        if (requestCode == rcSignIn) {
+//            val response = IdpResponse.fromResultIntent(data)
 
 
 
             if (resultCode == Activity.RESULT_OK) {
                 setDefaultDisplayNameByEmail()
+
+
                 finish()
             }
         }
