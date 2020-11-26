@@ -44,6 +44,10 @@ class OnePost: Fragment(R.layout.one_post_view) {
         position = args.position
         val post = viewModel.getPost(position)
         // XXX to bind profile photo
+        if (post.ownerProfilePhotoUUID != null) {
+            viewModel.glideFetch(post.ownerProfilePhotoUUID, profilePhotoIV)
+        }
+
         userNameTV.text = post.name
         // XXX bind photos swipe
         titleTV.text = post.title

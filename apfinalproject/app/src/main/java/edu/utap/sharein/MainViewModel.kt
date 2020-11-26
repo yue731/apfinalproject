@@ -213,16 +213,19 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
     }
 
-    fun createPost(title: String, text: String, pictureUUIDs: List<String>, musicUUID: String) {
+    fun createPost(title: String, text: String, pictureUUIDs: List<String>, musicUUID: String): String {
+        // create post and return postID
         val post = Post(
                 name = getUserName() ?: "",
                 ownerUid = myUid()!!,
                 title = title,
                 text = text,
                 pictureUUIDs = pictureUUIDs,
-                musicUUID = musicUUID
+                musicUUID = musicUUID,
+                ownerProfilePhotoUUID = currUser.value?.profilePhotoUUID ?: ""
         )
         dbHelp.createPost(post, postsList)
+        return post.postID
     }
 
     fun removePostAt(position: Int) {
@@ -287,6 +290,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     fun resetUser() {
         currUser.value = null
         currUserId.value = null
+        profilePhotoUUID = ""
     }
 
 
@@ -318,6 +322,11 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
      4. also need to update user for the change in profilephoto uuid
      */
     fun uploadProfilePhoto(bitmap: Bitmap) {
+        // if previously user has uploaded a profile photo, need to delete
+        if (profilePhotoUUID != "") {
+            storage.deleteImage(profilePhotoUUID)
+            profilePhotoUUID = ""
+        }
 
         profilePhotoUUID = UUID.randomUUID().toString()
         val localPhotoFile = File(storageDir, "${profilePhotoUUID}.jpg")
@@ -334,8 +343,14 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         storage.uploadImage(localPhotoFile, profilePhotoUUID) {
             Toast.makeText(appContext, "Profile Photo Upload Success!", Toast.LENGTH_LONG).show()
         }
-        currUser.value?.profilePhotoUUID = profilePhotoUUID
-        updateUser(currUser.value!!)
+        val user = currUser.value
+        if (user != null) {
+            user?.profilePhotoUUID = profilePhotoUUID
+            updateUser(user)
+        }
+        else {
+            Log.d(javaClass.simpleName, "user is null when uploading profile photo")
+        }
 
 
     }

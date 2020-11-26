@@ -33,6 +33,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
                     && oldItem.timeStamp == newItem.timeStamp
                     && oldItem.likes == newItem.likes
                     && oldItem.musicUUID == newItem.musicUUID
+                    && oldItem.ownerProfilePhotoUUID == newItem.ownerProfilePhotoUUID
         }
 
     }
@@ -74,6 +75,10 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
             }
             title.text = post.title
             // XXX to write user profile photo
+            if (post.ownerProfilePhotoUUID != null) {
+                viewModel.glideFetch(post.ownerProfilePhotoUUID, userPhotoIVSmall)
+            }
+
             userNameSmall.text = post.name
             likesCount.text = post.likes.toString()
 

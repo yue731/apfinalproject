@@ -186,7 +186,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         Log.d(javaClass.simpleName, " mainactivity stopped")
-        viewModel.resetUser()
         super.onStop()
     }
 

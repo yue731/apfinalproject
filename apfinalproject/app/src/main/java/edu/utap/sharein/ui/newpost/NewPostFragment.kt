@@ -24,6 +24,7 @@ class NewPostFragment : Fragment() {
     private lateinit var imageAdapter: ImageAdapter
     private lateinit var pictureUUIDs: List<String>
     private lateinit var musicUUID: String
+    private lateinit var profilePhotoUUID: String
     private var position = -1
     private val viewModel: MainViewModel by activityViewModels()
     private val args: NewPostFragmentArgs by navArgs()
@@ -54,6 +55,7 @@ class NewPostFragment : Fragment() {
             pictureUUIDs = listOf()
             // XXX update music info
             musicUUID = ""
+            profilePhotoUUID = viewModel.observeUser().value?.profilePhotoUUID ?: ""
         }
         else {
             val post = viewModel.getPost(position)
@@ -62,6 +64,7 @@ class NewPostFragment : Fragment() {
             pictureUUIDs = post.pictureUUIDs
             // XXX update music info
             musicUUID = ""
+            profilePhotoUUID = viewModel.observeUser().value?.profilePhotoUUID ?: ""
 
         }
         enterTitleET.requestFocus()
@@ -99,7 +102,13 @@ class NewPostFragment : Fragment() {
                 else {
                     if (position == -1) {
                         // new post
-                        viewModel.createPost(enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicUUID)
+                        val postID = viewModel.createPost(enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicUUID)
+                        val user = viewModel.observeUser().value
+                        if (user != null) {
+                            user.postsList.toMutableList().add(postID)
+                            viewModel.updateUser(user)
+                        }
+
                     }
                 }
                 findNavController().popBackStack()
