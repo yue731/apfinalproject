@@ -15,12 +15,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/userProfilePhoto" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/userProfilePhoto"
+        android:text="Upload"
+        style="?android:attr/buttonBarButtonStyle"
+        android:textSize="10sp"
+        android:textColor="@color/black"
+        android:id="@+id/uploadProfilePhotoBut"/>
+
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="50dp"
         android:id="@+id/emptySpace02"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userProfilePhoto" />
+        app:layout_constraintTop_toBottomOf="@+id/uploadProfilePhotoBut" />
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,29 +70,7 @@
 
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/idTX"
-            android:text="ID:"
-            android:textSize="15sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/nameTX"
-            android:layout_marginLeft="5dp" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/userId"
-            android:text="1000000000"
-            android:textSize="15sp"
-            app:layout_constraintTop_toBottomOf="@+id/userName"
-            app:layout_constraintEnd_toEndOf="@id/userName" />
-        <View
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/userId"
-            android:background="#D3D3D3" />
+
 
         <TextView
             android:layout_width="wrap_content"
@@ -89,7 +79,7 @@
             android:text="Email:"
             android:textSize="15sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/idTX"
+            app:layout_constraintTop_toBottomOf="@id/nameTX"
             android:layout_marginLeft="5dp"/>
         <TextView
             android:layout_width="wrap_content"
@@ -97,7 +87,7 @@
             android:id="@+id/userEmail"
             android:text="xxxx@example.com"
             android:textSize="15sp"
-            app:layout_constraintTop_toBottomOf="@id/userId"
+            app:layout_constraintTop_toBottomOf="@id/userName"
             app:layout_constraintEnd_toEndOf="@id/userName"/>
         <View
             android:layout_width="fill_parent"

@@ -5,6 +5,7 @@ plugins {
     id 'kotlin-kapt'
     id 'kotlin-android-extensions'
     id 'androidx.navigation.safeargs.kotlin'
+
 }
 
 android {
@@ -53,6 +54,11 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+
+
     // firebase stuff
     implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
     implementation platform('com.google.firebase:firebase-bom:26.1.0')
@@ -67,5 +73,9 @@ dependencies {
     kapt 'com.github.bumptech.glide:compiler:4.10.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
     annotationProcessor 'androidx.annotation:annotation:1.1.0'
+
+    // android image cropper
+    // https://github.com/ArthurHub/Android-Image-Cropper
+    api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
 
 }

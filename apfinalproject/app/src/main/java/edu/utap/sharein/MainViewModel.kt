@@ -1,10 +1,12 @@
 package edu.utap.sharein
 
 import android.app.Application
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.lifecycle.*
 import com.google.firebase.auth.FirebaseAuth
@@ -16,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -40,6 +43,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
     private lateinit var crashMe: String
     private var pictureUUID: String = ""
+    private var profilePhotoUUID: String = ""
     private var allImages = MutableLiveData<List<String>>()
 
     private var likedList = MutableLiveData<List<Post>>().apply {
@@ -272,9 +276,10 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     // 2. user creates a new post
     // 3. user likes a post
     // 4. user follow/unfollow other user
+    // 5. user updates profile photo
     fun updateUser(user: User) {
         Log.d(javaClass.simpleName, "updateUser is called")
-//        currUser.value = user
+        currUser.value = user
         dbHelp.updateUser(user)
 
     }
@@ -290,7 +295,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
     ////////////////////////////////////////////////////////////////////////
     /*
-     Deal with images
+     Deal with images XXX might not be required
      */
     private fun imageListReturns(pictureUUIDs: List<String>) {
         allImages.value = pictureUUIDs
@@ -302,6 +307,37 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
     fun observeAllImages(): LiveData<List<String>> {
         return allImages
+    }
+
+    /*
+     we have the bitmap of the profile photo
+     we need to:
+     1. save bitmap to a file
+     2. generate a uuid
+     3. upload to storage
+     4. also need to update user for the change in profilephoto uuid
+     */
+    fun uploadProfilePhoto(bitmap: Bitmap) {
+
+        profilePhotoUUID = UUID.randomUUID().toString()
+        val localPhotoFile = File(storageDir, "${profilePhotoUUID}.jpg")
+        try {
+            val out = FileOutputStream(localPhotoFile)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            out.flush()
+            out.close()
+        }
+        catch (e: IOException) {
+            Log.d(javaClass.simpleName, "Cannot create a file from the bitmap given")
+        }
+
+        storage.uploadImage(localPhotoFile, profilePhotoUUID) {
+            Toast.makeText(appContext, "Profile Photo Upload Success!", Toast.LENGTH_LONG).show()
+        }
+        currUser.value?.profilePhotoUUID = profilePhotoUUID
+        updateUser(currUser.value!!)
+
+
     }
     ////////////////////////////////////////////////////////////////////////
 

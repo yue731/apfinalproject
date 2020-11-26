@@ -50,6 +50,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
         postTV.text = post.text
         // XXX bind tag
         // XXX bind location
+        // XXX refine like
         likeIcon.setOnClickListener {
             if (!likeClicked) {
                 likeIcon.setImageResource(R.drawable.ic_baseline_favorite_24)

@@ -68,13 +68,18 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(authInitIntent, rcSignIn)
         viewModel.observeUserId().observe(this, Observer {
             var currUser = viewModel.observeUser().value
-            var currUserId = viewModel.observeUserId().value
+            var currUserId = viewModel.observeUserId().value //  id is set onResume if logged in already
             if (currUserId != null && currUser == null) {
                 Log.d(javaClass.simpleName, "curr user cannot be found")
                 viewModel.createUser()
                 setUserName()
+
             }
 
+        })
+
+        viewModel.observeUser().observe(this, Observer {
+            Log.d(javaClass.simpleName, "curr user is ${viewModel.observeUser().value}")
         })
 
 
@@ -130,7 +135,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUserName() {
         Log.d(javaClass.simpleName, "setUserName is called")
-        var setButPressed = false
+
 
         val currUserUID = viewModel.myUid()
         val currUser = viewModel.observeUser().value
@@ -205,6 +210,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(javaClass.simpleName, "curr user uid is ${currUserUID}")
 
         if(currUserUID == null) {
+            // not logged in yet
             super.onResume()
             return
         }
