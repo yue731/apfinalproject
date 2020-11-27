@@ -3,6 +3,7 @@ package edu.utap.sharein.ui.newpost
 
 import android.os.Bundle
 import android.text.TextUtils
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.*
 import android.widget.Toast
@@ -13,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import edu.utap.sharein.ImageAdapter
+import edu.utap.sharein.MainActivity
 import edu.utap.sharein.MainViewModel
 import edu.utap.sharein.R
 import kotlinx.android.synthetic.main.fragment_new_post.*
@@ -58,9 +60,11 @@ class NewPostFragment : Fragment() {
             profilePhotoUUID = viewModel.observeUser().value?.profilePhotoUUID ?: ""
         }
         else {
+            // edit post
             val post = viewModel.getPost(position)
             enterTitleET.text.insert(0, post.title)
             enterPostET.text.insert(0, post.text)
+            enterPostET.movementMethod = ScrollingMovementMethod()
             pictureUUIDs = post.pictureUUIDs
             // XXX update music info
             musicUUID = ""
@@ -73,9 +77,11 @@ class NewPostFragment : Fragment() {
         imageAdapter = ImageAdapter(viewModel) {
             // long click to remove image
             val shorterList = pictureUUIDs.toMutableList()
-            shorterList.removeAt(it)
+            val removedPictureUUID: String = shorterList.removeAt(it)
+            viewModel.deleteImage(removedPictureUUID)
             pictureUUIDs = shorterList
             imageAdapter.submitList(pictureUUIDs)
+
         }
         photosRV.adapter = imageAdapter
         imageAdapter.submitList(pictureUUIDs)
@@ -105,13 +111,25 @@ class NewPostFragment : Fragment() {
                         val postID = viewModel.createPost(enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicUUID)
                         val user = viewModel.observeUser().value
                         if (user != null) {
-                            user.postsList.toMutableList().add(postID)
+                            Log.d(javaClass.simpleName, "when post, user is not null")
+                            var tempList = user.postsList.toMutableList()
+                            tempList.add(postID)
+                            user.postsList = tempList
+                            Log.d(javaClass.simpleName, "the postslist is ${user.postsList}")
                             viewModel.updateUser(user)
                         }
 
                     }
+                    else {
+                        // edit post
+                        viewModel.updatePost(position, enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicUUID)
+
+                    }
+                    (activity as MainActivity?)?.hideKeyboard()
+                    findNavController().popBackStack()
                 }
-                findNavController().popBackStack()
+
+
                 true
             }
             R.id.cameraBut -> {
@@ -119,6 +137,7 @@ class NewPostFragment : Fragment() {
                 true
             }
             R.id.cancelBut -> {
+                (activity as MainActivity?)?.hideKeyboard()
                 findNavController().popBackStack()
                 true
             }

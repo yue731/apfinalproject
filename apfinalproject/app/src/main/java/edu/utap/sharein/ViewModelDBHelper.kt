@@ -1,9 +1,13 @@
 package edu.utap.sharein
 
 import android.util.Log
+import android.view.View
+import android.widget.ImageView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import edu.utap.sharein.glide.Glide
 import edu.utap.sharein.model.Post
 import edu.utap.sharein.model.User
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +35,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
      */
     fun dbFetchPosts(postsList: MutableLiveData<List<Post>>) {
         db.collection("allPosts")
-                .orderBy("timeStamp") // descending
+                .orderBy("timeStamp", Query.Direction.DESCENDING) // descending
                 .limit(100)
                 .get()
                 .addOnSuccessListener { result ->
@@ -44,6 +48,8 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                     Log.d(javaClass.simpleName, "allPosts fetch FAILED", it)
                 }
     }
+
+    
 
     /*
      After successfully modify db, re-fetch the contents to update live data
@@ -121,6 +127,25 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                     currUserId.value = uid
                 }
 
+    }
+
+    fun dbFetchOwner(imageView: ImageView, uid: String, storage: Storage){
+        // fetch post owner and bind profile photo too image view
+        db.collection("allUsers")
+            .document(uid)
+            .get()
+            .addOnSuccessListener { result ->
+                val u: User? = result.toObject(User::class.java)
+
+                if (u != null) {
+                    Glide.fetch(storage.uuid2StorageReference(u.profilePhotoUUID), imageView)
+                }
+
+
+            }
+            .addOnFailureListener {
+
+            }
     }
 
     fun createUser(user: User) {

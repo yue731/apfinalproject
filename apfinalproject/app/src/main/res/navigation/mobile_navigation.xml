@@ -20,6 +20,11 @@
             app:destination="@+id/navigation_one_post"
             app:enterAnim="@anim/fragment_open_enter"
             app:exitAnim="@anim/fragment_close_exit"/>
+        <action
+            android:id="@+id/action_navigatio_home_to_navigation_me"
+            app:destination="@+id/navigation_me"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"/>
 
     </fragment>
 
@@ -41,13 +46,18 @@
     <fragment
         android:id="@+id/navigation_profile"
         android:name="edu.utap.sharein.ui.profile.ProfileFragment"
-        android:label="@string/title_profile"
+        android:label="Profile"
         tools:layout="@layout/fragment_profile" >
         <action
             android:id="@+id/action_navigation_profile_to_navigation_home"
             app:destination="@id/navigation_home"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_navigation_profile_to_navigation_me"
+            app:destination="@+id/navigation_me"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"/>
     </fragment>
 
     <fragment
@@ -68,6 +78,25 @@
             app:destination="@+id/navigation_home"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_me"
+        android:name="edu.utap.sharein.MeFragment"
+        android:label="Me"
+        tools:layout="@layout/fragment_me">
+        <action
+            android:id="@+id/action_navigation_me_to_navigation_profile"
+            app:destination="@+id/navigation_profile"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_navigation_me_to_navigation_one_post"
+            app:destination="@+id/navigation_one_post"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+
 
     </fragment>
 

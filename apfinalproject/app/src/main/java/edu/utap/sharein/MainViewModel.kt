@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
+import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.FileProvider
@@ -37,6 +38,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     private var postsList = MutableLiveData<List<Post>>()
     private var currUserId = MutableLiveData<String>()
     private var currUser = MutableLiveData<User>()
+
     private val dbHelp = ViewModelDBHelper(postsList)
     private lateinit var storage: Storage
 
@@ -204,11 +206,12 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     }
 
     // after we successfully modify the post, we need to re-fetch the content to update livedata
-    fun updatePost(position: Int, title: String, text: String, pictureUUIDs: List<String>) {
+    fun updatePost(position: Int, title: String, text: String, pictureUUIDs: List<String>, musicUUID: String) {
         val post = getPost(position)
         post.title = title
         post.text = text
         post.pictureUUIDs = pictureUUIDs
+        post.musicUUID = musicUUID
         dbHelp.updatePost(post, postsList)
 
     }
@@ -221,8 +224,8 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
                 title = title,
                 text = text,
                 pictureUUIDs = pictureUUIDs,
-                musicUUID = musicUUID,
-                ownerProfilePhotoUUID = currUser.value?.profilePhotoUUID ?: ""
+                musicUUID = musicUUID
+
         )
         dbHelp.createPost(post, postsList)
         return post.postID
@@ -252,12 +255,20 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         return currUserId
     }
 
+
+
     fun fetchUser(uid: String) {
 
         dbHelp.dbFetchUser(currUser, currUserId,  uid)
 
         Log.d(javaClass.simpleName, "currUser value is ${currUser.value}")
     }
+
+    fun fetchOwner(imageView: ImageView, uid: String) {
+        // fetch post owner and bind profile photo too image view
+        dbHelp.dbFetchOwner(imageView, uid, storage)
+    }
+
 
     fun createUser() {
         Log.d(javaClass.simpleName, "createUser is called")
@@ -313,6 +324,10 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         return allImages
     }
 
+    fun deleteImage(pictureUUID: String) {
+        storage.deleteImage(pictureUUID)
+    }
+
     /*
      we have the bitmap of the profile photo
      we need to:
@@ -323,9 +338,9 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
      */
     fun uploadProfilePhoto(bitmap: Bitmap) {
         // if previously user has uploaded a profile photo, need to delete
-        if (profilePhotoUUID != "") {
-            storage.deleteImage(profilePhotoUUID)
-            profilePhotoUUID = ""
+        if (currUser.value != null && currUser.value!!.profilePhotoUUID != "") {
+            storage.deleteImage(currUser.value!!.profilePhotoUUID)
+
         }
 
         profilePhotoUUID = UUID.randomUUID().toString()
@@ -347,6 +362,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         if (user != null) {
             user?.profilePhotoUUID = profilePhotoUUID
             updateUser(user)
+
         }
         else {
             Log.d(javaClass.simpleName, "user is null when uploading profile photo")

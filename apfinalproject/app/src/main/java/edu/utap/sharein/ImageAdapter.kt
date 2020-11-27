@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
 
-class ImageAdapter(private val viewModel: MainViewModel, private val deletePos:((Int) -> Unit)? = null):
+class ImageAdapter(private val viewModel: MainViewModel, private val deleteImage:((Int) -> Unit)? = null):
     ListAdapter<String, ImageAdapter.VH>(Diff()) {
     class Diff: DiffUtil.ItemCallback<String>() {
         override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
@@ -24,12 +24,12 @@ class ImageAdapter(private val viewModel: MainViewModel, private val deletePos:(
         private var imageIB: ImageButton = view.findViewById(R.id.imageIB)
         fun bind(pictureUUID: String, position: Int) {
             viewModel.glideFetch(pictureUUID, imageIB)
-            if (deletePos == null) {
+            if (deleteImage == null) {
                 imageIB.isLongClickable = false
             }
             else {
                 imageIB.setOnLongClickListener {
-                    deletePos.invoke(position)
+                    deleteImage.invoke(position)
                     return@setOnLongClickListener true
                 }
             }

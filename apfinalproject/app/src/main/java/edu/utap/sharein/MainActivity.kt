@@ -8,6 +8,8 @@ import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import androidx.activity.viewModels
@@ -31,9 +33,19 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val rcSignIn = 17
         const val cameraRC = 10
+
     }
 
     private val viewModel: MainViewModel by viewModels()
+
+    // An Android nightmare
+    // https://stackoverflow.com/questions/1109022/close-hide-the-android-soft-keyboard
+    // https://stackoverflow.com/questions/7789514/how-to-get-activitys-windowtoken-without-view
+    fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(window.decorView.rootView.windowToken, 0);
+    }
+
 
 
 
@@ -52,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.navigation_home, R.id.navigation_new_post, R.id.navigation_profile))
+                R.id.navigation_home, R.id.navigation_new_post, R.id.navigation_me))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 

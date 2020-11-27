@@ -1,10 +1,14 @@
 package edu.utap.sharein
 
+import android.app.AlertDialog
+import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.text.Layout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -16,8 +20,12 @@ import edu.utap.sharein.model.Post
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 
-class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (Int) -> Unit)
+class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (Int) -> Unit, private val editDeleteAlert: (Int) -> Unit)
     : ListAdapter<Post, PostsAdapter.VH>(Diff()) {
+
+
+
+
     class Diff: DiffUtil.ItemCallback<Post>() {
         override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
            return oldItem.postID == newItem.postID
@@ -33,7 +41,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
                     && oldItem.timeStamp == newItem.timeStamp
                     && oldItem.likes == newItem.likes
                     && oldItem.musicUUID == newItem.musicUUID
-                    && oldItem.ownerProfilePhotoUUID == newItem.ownerProfilePhotoUUID
+//                    && oldItem.ownerProfilePhotoUUID == newItem.ownerProfilePhotoUUID
         }
 
     }
@@ -54,6 +62,8 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
 
 
 
+
+
         private fun bindPic1(imageList: List<String>) {
             if (imageList.isNotEmpty()) {
                 viewModel.glideFetch(imageList[0], pic1IV)
@@ -66,6 +76,14 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
             postRowContainer.setOnClickListener {
                 viewPost(adapterPosition)
             }
+            postRowContainer.setOnLongClickListener {
+                // edit or delete alert
+
+                editDeleteAlert(adapterPosition)
+
+
+                true
+            }
         }
         fun bind(post: Post) {
 
@@ -75,9 +93,10 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
             }
             title.text = post.title
             // XXX to write user profile photo
-            if (post.ownerProfilePhotoUUID != null) {
-                viewModel.glideFetch(post.ownerProfilePhotoUUID, userPhotoIVSmall)
-            }
+            val ownerUID = post.ownerUid
+            viewModel.fetchOwner(userPhotoIVSmall, ownerUID) // fetch post owner and bind profile photo too image view
+
+
 
             userNameSmall.text = post.name
             likesCount.text = post.likes.toString()
@@ -87,11 +106,38 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.post_list_row, parent, false)
+
         return VH(itemView)
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         holder.bind(viewModel.getPost(holder.adapterPosition))
     }
+
+//    private fun editOrDelete(mContext: Context, pos: Int) {
+//        val editOrDeleteLayout = LayoutInflater.from(mContext).inflate(R.layout.edit_or_delete_alert, null)
+//        val dialogBuilder = AlertDialog.Builder(mContext)
+//        dialogBuilder.setCancelable(false)
+//            .setView(editOrDeleteLayout)
+//        val alert = dialogBuilder.create()
+//        alert.show()
+//        val editBut = editOrDeleteLayout.findViewById<Button>(R.id.editBut)
+//        val deleteBut = editOrDeleteLayout.findViewById<Button>(R.id.deleteBut)
+//        val cancelEditDeleteBut = editOrDeleteLayout.findViewById<Button>(R.id.cancelEditDeleteBut)
+//
+//        editBut.setOnClickListener {
+//            editPost(pos)
+//            alert.cancel()
+//        }
+//        deleteBut.setOnClickListener {
+//            deletePost(pos)
+//            alert.cancel()
+//        }
+//        cancelEditDeleteBut.setOnClickListener {
+//            alert.cancel()
+//        }
+//    }
+
+
 
 }

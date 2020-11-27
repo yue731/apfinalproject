@@ -7,6 +7,7 @@ data class User (
         var postsList: List<String> = listOf(),
         var likedPosts: List<String> = listOf(),
         var following: List<String> = listOf(),
+        var followers: List<String> = listOf(),
         var isUserNameSet: Boolean = false,
         var profilePhotoUUID: String = ""
 )

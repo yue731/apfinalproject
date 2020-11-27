@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/meProfilePhotoIV"
+        android:src="@drawable/profile"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="5dp"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/meUserName"
+        android:textSize="20sp"
+        app:layout_constraintStart_toEndOf="@+id/meProfilePhotoIV"
+        app:layout_constraintTop_toTopOf="@+id/meProfilePhotoIV"
+        android:text="meow001"
+        android:layout_marginLeft="2dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/followingText"
+        android:text="Following: "
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@+id/meUserName"
+        app:layout_constraintTop_toBottomOf="@id/meUserName"
+        android:layout_marginTop="5dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/meFollowing"
+        android:text="0"
+        android:textSize="15sp"
+        app:layout_constraintStart_toEndOf="@+id/followingText"
+        app:layout_constraintTop_toTopOf="@+id/followingText"
+        android:layout_marginLeft="5dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/followerText"
+        android:text="Follower: "
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@+id/followingText"
+        app:layout_constraintTop_toBottomOf="@+id/followingText"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/meFollower"
+        android:text="0"
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@+id/meFollowing"
+        app:layout_constraintTop_toBottomOf="@+id/meFollowing"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/meToProfileBut"
+        android:text="Profile"
+        style="?android:attr/buttonBarButtonStyle"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toEndOf="@+id/meFollowing"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/meProfilePhotoIV"
+        app:layout_constraintBottom_toBottomOf="@+id/meProfilePhotoIV"/>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/meRV"
+        app:layout_constraintStart_toStartOf="@+id/meProfilePhotoIV"
+        app:layout_constraintTop_toBottomOf="@+id/meProfilePhotoIV"
+        android:layout_marginTop="15dp"/>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

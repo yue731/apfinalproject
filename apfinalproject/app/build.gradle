@@ -78,4 +78,8 @@ dependencies {
     // https://github.com/ArthurHub/Android-Image-Cropper
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
 
+    // For image swipe and circle page indicator
+    implementation 'com.google.android.material:material:material_design_version'
+    implementation 'com.github.splatte:ViewPagerIndicator:3.0.0'
+
 }

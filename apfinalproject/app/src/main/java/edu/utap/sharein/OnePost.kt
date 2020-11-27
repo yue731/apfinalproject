@@ -1,15 +1,19 @@
 package edu.utap.sharein
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
+import android.text.method.ScrollingMovementMethod
 import android.view.View
 import android.widget.ImageView
+import android.widget.TableLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
+import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import com.viewpagerindicator.CirclePageIndicator
 
 class OnePost: Fragment(R.layout.one_post_view) {
 
@@ -29,7 +33,8 @@ class OnePost: Fragment(R.layout.one_post_view) {
     private fun displayPost(view: View) {
         var profilePhotoIV: ImageView = view.findViewById(R.id.profilePhotoIV)
         var userNameTV: TextView = view.findViewById(R.id.userNameTV)
-        var photoIV: ImageView = view.findViewById(R.id.photoIV) // XXX to do a image swipe
+        var photoVP: ViewPager2 = view.findViewById(R.id.photoVP) // XXX to do a image swipe
+
         var titleTV: TextView = view.findViewById(R.id.titleTV)
         var postTV: TextView = view.findViewById(R.id.postTV)
         var tagTV: TextView = view.findViewById(R.id.tagTV)
@@ -44,14 +49,32 @@ class OnePost: Fragment(R.layout.one_post_view) {
         position = args.position
         val post = viewModel.getPost(position)
         // XXX to bind profile photo
-        if (post.ownerProfilePhotoUUID != null) {
-            viewModel.glideFetch(post.ownerProfilePhotoUUID, profilePhotoIV)
-        }
+        viewModel.fetchOwner(profilePhotoIV, post.ownerUid) // fetch post owner and bind profile photo too image view
 
         userNameTV.text = post.name
+
         // XXX bind photos swipe
+        val imageSiderRVAdapter = ImageSliderRVAdapter(viewModel, post)
+        photoVP.adapter = imageSiderRVAdapter
+
+        val indicator = view.findViewById<TabLayout>(R.id.indicator)
+        TabLayoutMediator(indicator, photoVP) { tab, position ->
+
+        }.attach()
+
+
+
+
+
+
+
+
+
+
+
         titleTV.text = post.title
         postTV.text = post.text
+        postTV.movementMethod = ScrollingMovementMethod()
         // XXX bind tag
         // XXX bind location
         // XXX refine like
