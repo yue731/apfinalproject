@@ -1,14 +1,11 @@
 package edu.utap.sharein
 
-import android.app.AlertDialog
-import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.text.Layout
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -23,7 +20,7 @@ import java.text.SimpleDateFormat
 class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (Int) -> Unit, private val editDeleteAlert: (Int) -> Unit)
     : ListAdapter<Post, PostsAdapter.VH>(Diff()) {
 
-
+    private var postsList = mutableListOf<Post>()
 
 
     class Diff: DiffUtil.ItemCallback<Post>() {
@@ -41,7 +38,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
                     && oldItem.timeStamp == newItem.timeStamp
                     && oldItem.likes == newItem.likes
                     && oldItem.musicUUID == newItem.musicUUID
-//                    && oldItem.ownerProfilePhotoUUID == newItem.ownerProfilePhotoUUID
+
         }
 
     }
@@ -86,7 +83,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
             }
         }
         fun bind(post: Post) {
-
+            Log.d(javaClass.simpleName, "trying to bind post for ${post.ownerUid}")
             bindPic1(post.pictureUUIDs)
             post.timeStamp?.let {
                 timestamp.text = dateFormat.format(it.toDate())
@@ -94,7 +91,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
             title.text = post.title
             // XXX to write user profile photo
             val ownerUID = post.ownerUid
-            viewModel.fetchOwner(userPhotoIVSmall, ownerUID) // fetch post owner and bind profile photo too image view
+            viewModel.fetchOwner(userPhotoIVSmall, ownerUID) // fetch post owner and bind profile photo to image view
 
 
 
@@ -111,32 +108,20 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
     }
 
     override fun onBindViewHolder(holder: VH, position: Int) {
-        holder.bind(viewModel.getPost(holder.adapterPosition))
+        holder.bind(postsList[holder.adapterPosition])
     }
 
-//    private fun editOrDelete(mContext: Context, pos: Int) {
-//        val editOrDeleteLayout = LayoutInflater.from(mContext).inflate(R.layout.edit_or_delete_alert, null)
-//        val dialogBuilder = AlertDialog.Builder(mContext)
-//        dialogBuilder.setCancelable(false)
-//            .setView(editOrDeleteLayout)
-//        val alert = dialogBuilder.create()
-//        alert.show()
-//        val editBut = editOrDeleteLayout.findViewById<Button>(R.id.editBut)
-//        val deleteBut = editOrDeleteLayout.findViewById<Button>(R.id.deleteBut)
-//        val cancelEditDeleteBut = editOrDeleteLayout.findViewById<Button>(R.id.cancelEditDeleteBut)
-//
-//        editBut.setOnClickListener {
-//            editPost(pos)
-//            alert.cancel()
-//        }
-//        deleteBut.setOnClickListener {
-//            deletePost(pos)
-//            alert.cancel()
-//        }
-//        cancelEditDeleteBut.setOnClickListener {
-//            alert.cancel()
-//        }
-//    }
+    override fun getItemCount(): Int {
+        return postsList.size
+    }
+
+    fun addAll(items: List<Post>) {
+        postsList.addAll(items)
+    }
+
+    fun clearAll() {
+        postsList.clear()
+    }
 
 
 

@@ -1,14 +1,11 @@
 package edu.utap.sharein
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
@@ -16,18 +13,12 @@ import androidx.activity.viewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.navigation.ActionOnlyNavDirections
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import edu.utap.sharein.model.User
-import edu.utap.sharein.ui.home.HomeFragmentDirections
-import kotlinx.android.synthetic.main.set_user_name.*
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -60,6 +51,8 @@ class MainActivity : AppCompatActivity() {
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
         Log.d(javaClass.simpleName, "navigation inflated")
 
+
+
         val navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -68,11 +61,27 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
+        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+            when (destination.id) {
+                R.id.navigation_home -> {
+                    viewModel.updateFetchStatus(Constants.FETCH_TRENDING)
+                    viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
+                }
+                R.id.navigation_me -> {
+                    viewModel.updateFetchStatus(Constants.FETCH_CURR_USER_POSTS)
+                    viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
+                }
+            }
+        }
+
         // take photo intent
         viewModel.setPhotoIntent(::takePhotoIntent)
 
         // storage initialization
         viewModel.firestoreInit(Storage())
+
+
+        viewModel.initFetchStatus()
 
         // user authentication
         initUserUI()
@@ -126,6 +135,8 @@ class MainActivity : AppCompatActivity() {
         onBackPressed()
         return true
     }
+
+
 
     private fun initUserUI() {
         viewModel.observeFirebaseAuthLiveData().observe(this, Observer {
@@ -214,7 +225,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         Log.d(javaClass.simpleName, "mainactivity resumed")
-        viewModel.fetchPosts()
+        viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
 
         val currUserUID =viewModel.myUid()
 

@@ -1,24 +1,20 @@
 package edu.utap.sharein
 
 import android.util.Log
-import android.view.View
 import android.widget.ImageView
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import edu.utap.sharein.glide.Glide
 import edu.utap.sharein.model.Post
 import edu.utap.sharein.model.User
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
 
     init {
-        dbFetchPosts(postsList)
+        dbFetchPostsTrending(postsList)
 
     }
 
@@ -33,36 +29,85 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
     /*
      Interact with cloud firestore
      */
-    fun dbFetchPosts(postsList: MutableLiveData<List<Post>>) {
+    fun dbFetchPostsTrending(postsList: MutableLiveData<List<Post>>) {
         db.collection("allPosts")
                 .orderBy("timeStamp", Query.Direction.DESCENDING) // descending
                 .limit(100)
                 .get()
                 .addOnSuccessListener { result ->
                     Log.d(javaClass.simpleName, "allPosts fetch ${result.documents.size}")
-                    postsList.postValue(result.documents.mapNotNull {
+                    postsList.value = result.documents.mapNotNull {
                         it.toObject(Post::class.java)
-                    })
+                    }
                 }
                 .addOnFailureListener {
                     Log.d(javaClass.simpleName, "allPosts fetch FAILED", it)
                 }
     }
 
-    
+    fun dbFetchPostsFollow(followers: List<String>, postsList: MutableLiveData<List<Post>>) {
+        db.collection("allPosts")
+            .orderBy("timeStamp", Query.Direction.DESCENDING)
+            .whereIn("ownerUid", followers)
+            .limit(100)
+            .get()
+            .addOnSuccessListener {
+
+            }
+            .addOnFailureListener {
+
+            }
+    }
+
+    fun dbFetchPostsCurrUser(uid: String, postsList: MutableLiveData<List<Post>>) {
+        db.collection("allPosts")
+            .orderBy("timeStamp", Query.Direction.DESCENDING)
+            .whereEqualTo("ownerUid", uid)
+            .limit(100)
+            .get()
+            .addOnSuccessListener { result ->
+                Log.d(javaClass.simpleName, "fetch curr user posts success")
+                postsList.value = result.documents.mapNotNull {
+                    it.toObject(Post::class.java)
+                }
+
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "fetch curr posts FAILED")
+            }
+    }
 
     /*
      After successfully modify db, re-fetch the contents to update live data
      Thus dbFetchPosts is called here
      */
-    fun updatePost(post: Post, postsList: MutableLiveData<List<Post>>) {
+    fun updatePost(fetchStatus: Int, post: Post, postsList: MutableLiveData<List<Post>>) {
         val pictureUUIDs = post.pictureUUIDs
         db.collection("allPosts")
                 .document(post.postID)
                 .set(post)
                 .addOnSuccessListener {
                     Log.d(javaClass.simpleName, "Post update success \"${ellipsizeString(post.text)}\" len ${pictureUUIDs.size} id ${post.postID}")
-                    dbFetchPosts(postsList)
+                    when(fetchStatus) {
+                        Constants.FETCH_FOLLOW -> {
+
+                        }
+                        Constants.FETCH_TRENDING -> {
+                            dbFetchPostsTrending(postsList)
+                        }
+                        Constants.FETCH_NEARBY -> {
+
+                        }
+                        Constants.FETCH_CURR_USER_POSTS -> {
+                            dbFetchPostsCurrUser(post.ownerUid, postsList)
+                        }
+                        Constants.FETCH_LIKED -> {
+
+                        }
+                    }
+
+
+
                 }
                 .addOnFailureListener {
                     Log.d(javaClass.simpleName, "Post update FAILED \"${ellipsizeString(post.text)}\"")
@@ -73,7 +118,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
     /*
      After creating the post, need to re-fetch the contents
      */
-    fun createPost(post: Post, postsList: MutableLiveData<List<Post>>) {
+    fun createPost(fetchStatus: Int, post: Post, postsList: MutableLiveData<List<Post>>) {
         // cloud firestore generates the postID
         post.postID = db.collection("allPosts").document().id
         db.collection("allPosts")
@@ -82,7 +127,24 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                 .set(post)
                 .addOnSuccessListener {
                     Log.d(javaClass.simpleName, "Post create success \"${ellipsizeString(post.text)}\" id ${post.postID}")
-                    dbFetchPosts(postsList)
+                    when(fetchStatus) {
+                        Constants.FETCH_FOLLOW -> {
+
+                        }
+                        Constants.FETCH_TRENDING -> {
+                            Log.d("create new", "fetch trending")
+                            dbFetchPostsTrending(postsList)
+                        }
+                        Constants.FETCH_NEARBY -> {
+
+                        }
+                        Constants.FETCH_CURR_USER_POSTS -> {
+                            dbFetchPostsCurrUser(post.ownerUid, postsList)
+                        }
+                        Constants.FETCH_LIKED -> {
+
+                        }
+                    }
                 }
                 .addOnFailureListener {
                     Log.d(javaClass.simpleName, "Post create FAILED \"${ellipsizeString(post.text)}\"")
@@ -93,11 +155,27 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
     /*
      After deleting the post, need to re-fetch the contents
      */
-    fun removePost(post: Post, postsList: MutableLiveData<List<Post>>) {
+    fun removePost(fetchStatus: Int, post: Post, postsList: MutableLiveData<List<Post>>) {
         db.collection("allPosts").document(post.postID).delete()
                 .addOnSuccessListener {
                     Log.d(javaClass.simpleName, "Post delete success \"${ellipsizeString(post.text)}\" id ${post.postID}")
-                    dbFetchPosts(postsList)
+                    when(fetchStatus) {
+                        Constants.FETCH_FOLLOW -> {
+
+                        }
+                        Constants.FETCH_TRENDING -> {
+                            dbFetchPostsTrending(postsList)
+                        }
+                        Constants.FETCH_NEARBY -> {
+
+                        }
+                        Constants.FETCH_CURR_USER_POSTS -> {
+                            dbFetchPostsCurrUser(post.ownerUid, postsList)
+                        }
+                        Constants.FETCH_LIKED -> {
+
+                        }
+                    }
                 }
                 .addOnFailureListener {
                     Log.d(javaClass.simpleName, "Post delete FAILED \"${ellipsizeString(post.text)}\" id ${post.postID}")
@@ -131,20 +209,24 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
 
     fun dbFetchOwner(imageView: ImageView, uid: String, storage: Storage){
         // fetch post owner and bind profile photo too image view
+        Log.d(javaClass.simpleName, "trying to fetch $uid")
         db.collection("allUsers")
             .document(uid)
             .get()
             .addOnSuccessListener { result ->
                 val u: User? = result.toObject(User::class.java)
 
-                if (u != null) {
+                if (u != null && u.profilePhotoUUID != "") {
                     Glide.fetch(storage.uuid2StorageReference(u.profilePhotoUUID), imageView)
+                    Log.d(javaClass.simpleName, "user fetch profile photo ${u.name}")
+                } else {
+                    Log.d(javaClass.simpleName, "user fetch profile photo failed")
                 }
 
 
             }
             .addOnFailureListener {
-
+                Log.d(javaClass.simpleName, "user fetch profile photo failed e")
             }
     }
 

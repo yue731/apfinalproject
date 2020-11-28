@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.google.firebase.auth.FirebaseUser
+import edu.utap.sharein.Constants
 import edu.utap.sharein.MainViewModel
 import edu.utap.sharein.PostsAdapter
 import edu.utap.sharein.R
@@ -68,7 +69,10 @@ class HomeFragment : Fragment() {
 
         viewModel.observePosts().observe(viewLifecycleOwner, Observer {
             toggleEmptyPosts()
-            postsAdapter.submitList(it)
+            postsAdapter.clearAll()
+
+            postsAdapter.addAll(it)
+            postsAdapter.notifyDataSetChanged()
         })
 
         // set initial state
@@ -82,6 +86,26 @@ class HomeFragment : Fragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.main_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.follow -> {
+                true
+            }
+            R.id.trending -> {
+                viewModel.updateFetchStatus(Constants.FETCH_TRENDING)
+                viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
+                true
+            }
+            R.id.nearby -> {
+                true
+            }
+            R.id.search -> {
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun viewPost(position: Int) {
@@ -108,6 +132,7 @@ class HomeFragment : Fragment() {
                 user.postsList = tempList
                 viewModel.updateUser(user)
             }
+
 
 
         }

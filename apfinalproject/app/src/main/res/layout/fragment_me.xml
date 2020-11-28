@@ -78,7 +78,7 @@
         android:id="@+id/meRV"
         app:layout_constraintStart_toStartOf="@+id/meProfilePhotoIV"
         app:layout_constraintTop_toBottomOf="@+id/meProfilePhotoIV"
-        android:layout_marginTop="15dp"/>
+        android:layout_marginTop="50dp"/>
 
 
 

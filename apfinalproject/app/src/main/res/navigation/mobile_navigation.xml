@@ -41,6 +41,17 @@
             android:name="title"
             app:argType="string"
             android:defaultValue="New Post" />
+        <action
+            android:id="@+id/action_navigation_new_post_to_navigation_home"
+            app:destination="@+id/navigation_home"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"/>
+        <action
+            android:id="@+id/action_navigation_new_post_to_navigation_me"
+            app:destination="@+id/navigation_me"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"/>
+
     </fragment>
 
     <fragment
@@ -94,6 +105,11 @@
         <action
             android:id="@+id/action_navigation_me_to_navigation_one_post"
             app:destination="@+id/navigation_one_post"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_navigation_me_to_navigation_new_post"
+            app:destination="@+id/navigation_new_post"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
 

@@ -36,6 +36,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/postTitleTV"
         android:text="Title"
+        android:maxLines="1"
+        android:ellipsize="end"
         android:textSize="15sp"
         app:layout_constraintTop_toBottomOf="@id/timestamp"
         app:layout_constraintStart_toStartOf="parent" />
@@ -50,7 +52,8 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/userPhotoIVSmall" />
+            android:id="@+id/userPhotoIVSmall"
+            android:src="@drawable/profile"/>
 
     </androidx.cardview.widget.CardView>
 

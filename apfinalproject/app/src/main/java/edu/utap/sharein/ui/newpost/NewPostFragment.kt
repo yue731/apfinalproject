@@ -13,12 +13,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import edu.utap.sharein.ImageAdapter
-import edu.utap.sharein.MainActivity
-import edu.utap.sharein.MainViewModel
-import edu.utap.sharein.R
+import edu.utap.sharein.*
 import kotlinx.android.synthetic.main.fragment_new_post.*
-import java.util.*
 
 class NewPostFragment : Fragment() {
 
@@ -109,6 +105,7 @@ class NewPostFragment : Fragment() {
                     if (position == -1) {
                         // new post
                         val postID = viewModel.createPost(enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicUUID)
+                        Log.d(javaClass.simpleName, "fetch status is ${viewModel.observeFetchStatus().value} ")
                         val user = viewModel.observeUser().value
                         if (user != null) {
                             Log.d(javaClass.simpleName, "when post, user is not null")
@@ -126,7 +123,15 @@ class NewPostFragment : Fragment() {
 
                     }
                     (activity as MainActivity?)?.hideKeyboard()
-                    findNavController().popBackStack()
+                    val status = viewModel.observeFetchStatus().value
+                    if (status == Constants.FETCH_FOLLOW || status == Constants.FETCH_TRENDING || status == Constants.FETCH_NEARBY) {
+                        val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationHome()
+                        findNavController().navigate(action)
+                    }
+                    else {
+                        val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationMe()
+                        findNavController().navigate(action)
+                    }
                 }
 
 
@@ -138,7 +143,15 @@ class NewPostFragment : Fragment() {
             }
             R.id.cancelBut -> {
                 (activity as MainActivity?)?.hideKeyboard()
-                findNavController().popBackStack()
+                val status = viewModel.observeFetchStatus().value
+                if (status == Constants.FETCH_FOLLOW || status == Constants.FETCH_TRENDING || status == Constants.FETCH_NEARBY) {
+                    val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationHome()
+                    findNavController().navigate(action)
+                }
+                else {
+                    val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationMe()
+                    findNavController().navigate(action)
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)

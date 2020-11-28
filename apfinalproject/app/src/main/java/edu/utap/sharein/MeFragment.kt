@@ -1,5 +1,6 @@
 package edu.utap.sharein
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.Button
@@ -7,9 +8,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import edu.utap.sharein.ui.home.HomeFragmentDirections
 
 
 class MeFragment : Fragment() {
@@ -50,9 +53,14 @@ class MeFragment : Fragment() {
         }
 
         meRV.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-//        postsAdapter = PostsAdapter(viewModel) {
-//            val action =
-//        }
+        postsAdapter = PostsAdapter(viewModel, ::viewPost, ::editDeleteAlert)
+        meRV.adapter = postsAdapter
+        viewModel.observePosts().observe(viewLifecycleOwner, Observer {
+            postsAdapter.clearAll()
+
+            postsAdapter.addAll(it)
+            postsAdapter.notifyDataSetChanged()
+        })
 
     }
 
@@ -63,6 +71,8 @@ class MeFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.mePosts -> {
+                viewModel.updateFetchStatus(Constants.FETCH_CURR_USER_POSTS)
+                viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
                 true
             }
             R.id.meLiked -> {
@@ -71,5 +81,67 @@ class MeFragment : Fragment() {
             else -> super.onOptionsItemSelected(item)
         }
 
+    }
+
+    private fun viewPost(position: Int) {
+        val action = MeFragmentDirections.actionNavigationMeToNavigationOnePost(position, "Post")
+        findNavController().navigate(action)
+    }
+
+    private fun editPost(position: Int) {
+        if (permission(position)) {
+            val action = MeFragmentDirections.actionNavigationMeToNavigationNewPost(position, "Edit")
+            findNavController().navigate(action)
+        }
+
+
+    }
+
+    private fun deletePost(position: Int) {
+        if (permission(position)) {
+            val user = viewModel.observeUser().value
+            if (user != null) {
+                var tempList = user.postsList.toMutableList()
+                tempList.remove(viewModel.getPost(position).postID)
+                user.postsList = tempList
+                viewModel.updateUser(user)
+            }
+            viewModel.removePostAt(position)
+
+
+        }
+    }
+
+    private fun editDeleteAlert(position: Int) {
+        if (permission(position)) {
+            val editOrDeleteLayout = LayoutInflater.from(requireContext()).inflate(R.layout.edit_or_delete_alert, null)
+            val dialogBuilder = AlertDialog.Builder(requireContext())
+            dialogBuilder.setCancelable(false)
+                .setView(editOrDeleteLayout)
+            val alert = dialogBuilder.create()
+            alert.show()
+            val editBut = editOrDeleteLayout.findViewById<Button>(R.id.editBut)
+            val deleteBut = editOrDeleteLayout.findViewById<Button>(R.id.deleteBut)
+            val cancelEditDeleteBut = editOrDeleteLayout.findViewById<Button>(R.id.cancelEditDeleteBut)
+
+            editBut.setOnClickListener {
+                editPost(position)
+                alert.cancel()
+            }
+            deleteBut.setOnClickListener {
+                deletePost(position)
+                alert.cancel()
+            }
+            cancelEditDeleteBut.setOnClickListener {
+                alert.cancel()
+            }
+        }
+    }
+
+    private fun permission(position: Int): Boolean {
+        val post = viewModel.getPost(position)
+        val postOwner = post.ownerUid
+        val currUser = viewModel.observeUser().value
+        return (currUser != null && postOwner == currUser.uid)
     }
 }

@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
-import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.FileProvider
@@ -15,15 +14,10 @@ import com.google.firebase.auth.FirebaseUser
 import edu.utap.sharein.glide.Glide
 import edu.utap.sharein.model.Post
 import edu.utap.sharein.model.User
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class MainViewModel(application: Application, private val state: SavedStateHandle) : AndroidViewModel(application) {
     companion object {
@@ -36,10 +30,16 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     private var firebaseAuthLiveData = FirebaseAuthLiveData()
 
     private var postsList = MutableLiveData<List<Post>>()
+    private val dbHelp = ViewModelDBHelper(postsList)
+    private var fetchStatus = MutableLiveData<Int>()
+
+
+
+
     private var currUserId = MutableLiveData<String>()
     private var currUser = MutableLiveData<User>()
 
-    private val dbHelp = ViewModelDBHelper(postsList)
+
     private lateinit var storage: Storage
 
 
@@ -196,8 +196,29 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         return postsList.value.isNullOrEmpty()
     }
 
-    fun fetchPosts() {
-        dbHelp.dbFetchPosts(postsList)
+    fun fetchPosts(status: Int) {
+        when(status) {
+            Constants.FETCH_FOLLOW -> {
+
+            }
+            Constants.FETCH_TRENDING -> {
+                dbHelp.dbFetchPostsTrending(postsList)
+            }
+            Constants.FETCH_NEARBY -> {
+
+            }
+            Constants.FETCH_CURR_USER_POSTS -> {
+                if (currUser.value != null) {
+                    dbHelp.dbFetchPostsCurrUser(currUser.value!!.uid, postsList)
+
+                }
+
+            }
+            Constants.FETCH_LIKED -> {
+
+            }
+        }
+
     }
 
     fun getPost(position: Int): Post {
@@ -212,7 +233,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         post.text = text
         post.pictureUUIDs = pictureUUIDs
         post.musicUUID = musicUUID
-        dbHelp.updatePost(post, postsList)
+        dbHelp.updatePost(fetchStatus.value!!, post, postsList)
 
     }
 
@@ -227,7 +248,10 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
                 musicUUID = musicUUID
 
         )
-        dbHelp.createPost(post, postsList)
+        dbHelp.createPost(fetchStatus.value!!, post, postsList)
+        var longerList = postsList.value?.toMutableList()
+        longerList?.add(post)
+        postsList.value = longerList
         return post.postID
     }
 
@@ -237,7 +261,20 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         post.pictureUUIDs.forEach {
             storage.deleteImage(it)
         }
-        dbHelp.removePost(post, postsList)
+        dbHelp.removePost(fetchStatus.value!!, post, postsList)
+
+    }
+
+
+    fun initFetchStatus() {
+        fetchStatus.value = Constants.FETCH_TRENDING
+    }
+    fun observeFetchStatus(): LiveData<Int> {
+        return fetchStatus
+    }
+
+    fun updateFetchStatus(status: Int) {
+        fetchStatus.value = status
     }
     ////////////////////////////////////////////////////////////////////////
 
@@ -265,7 +302,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     }
 
     fun fetchOwner(imageView: ImageView, uid: String) {
-        // fetch post owner and bind profile photo too image view
+        // fetch post owner and bind profile photo to image view
         dbHelp.dbFetchOwner(imageView, uid, storage)
     }
 
@@ -301,7 +338,9 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     fun resetUser() {
         currUser.value = null
         currUserId.value = null
-        profilePhotoUUID = ""
+        val list: List<Post> = listOf()
+        postsList.value = list
+//        profilePhotoUUID = ""
     }
 
 
