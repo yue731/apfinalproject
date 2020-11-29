@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
 
+
     // An Android nightmare
     // https://stackoverflow.com/questions/1109022/close-hide-the-android-soft-keyboard
     // https://stackoverflow.com/questions/7789514/how-to-get-activitys-windowtoken-without-view
@@ -239,6 +240,8 @@ class MainActivity : AppCompatActivity() {
 
         Log.d(javaClass.simpleName, "curr user uid is not null")
         viewModel.fetchUser(currUserUID)
+
+
 
 
         super.onResume()

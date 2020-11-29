@@ -8,10 +8,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import edu.utap.sharein.model.Follow
 import edu.utap.sharein.ui.home.HomeFragmentDirections
 
 
@@ -45,7 +47,37 @@ class MeFragment : Fragment() {
         }
         meUserName.text = user?.name
         // XXX wrtie about following and on click listener to list of following
+
+        viewModel.resetFollowingList()
+        viewModel.fetchFollowing(user!!.uid)
+        viewModel.observeFollowing().observe(viewLifecycleOwner, Observer {
+            if (viewModel.observeFollowing().value == null) {
+                meFollowing.text = "0"
+            }
+            else {
+                meFollowing.text = viewModel.observeFollowing().value!!.size.toString()
+            }
+        })
+
+        meFollowing.setOnClickListener {
+
+        }
         // XXX write about follower and on click listener to list of follower
+        viewModel.resetFollowerList()
+        viewModel.fetchFollower(user!!.uid)
+        viewModel.observeFollower().observe(viewLifecycleOwner, Observer {
+            if (viewModel.observeFollower().value == null) {
+                meFollower.text = "0"
+            }
+            else {
+                meFollower.text = viewModel.observeFollower().value!!.size.toString()
+            }
+        })
+
+
+        meFollower.setOnClickListener {
+
+        }
 
         meToProfileBut.setOnClickListener {
             val action = MeFragmentDirections.actionNavigationMeToNavigationProfile()

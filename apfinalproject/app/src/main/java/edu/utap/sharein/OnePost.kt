@@ -1,12 +1,16 @@
 package edu.utap.sharein
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -21,6 +25,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         displayPost(view)
+        Log.d(javaClass.simpleName, "on view created")
 
 
 
@@ -40,17 +45,19 @@ class OnePost: Fragment(R.layout.one_post_view) {
         var likeIcon: ImageView = view.findViewById(R.id.onePostLikeIcon)
         var likeCount: TextView = view.findViewById(R.id.onePostLikeCount)
         var comment: ImageView = view.findViewById(R.id.onePostComment)
+        var addFriendIV: ImageView = view.findViewById(R.id.addFriendIV)
         var likeClicked: Boolean = false
+
 
 
         position = args.position
         val post = viewModel.getPost(position)
-        // XXX to bind profile photo
-        viewModel.fetchOwner(profilePhotoIV, post.ownerUid) // fetch post owner and bind profile photo too image view
+        //  to bind profile photo
+        viewModel.fetchOwner(profilePhotoIV, post.ownerUid) // fetch post owner and bind profile photo to image view
 
         userNameTV.text = post.name
 
-        // XXX bind photos swipe
+        //  bind photos swipe
         val imageSiderRVAdapter = ImageSliderRVAdapter(viewModel, post)
         photoVP.adapter = imageSiderRVAdapter
 
@@ -62,16 +69,43 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
 
 
-
-
-
-
-
-
-
         titleTV.text = post.title
         postTV.text = post.text
         postTV.movementMethod = ScrollingMovementMethod()
+
+        // handle follow
+        val meUID = viewModel.observeUser().value!!.uid
+        val postOwnerUID = post.ownerUid
+
+
+        if (meUID == postOwnerUID) {
+            addFriendIV.setImageDrawable(ColorDrawable(Color.TRANSPARENT))
+            addFriendIV.isClickable = false
+        }
+        else {
+            viewModel.resetFollowingList()
+            viewModel.observeFollowing().observe(viewLifecycleOwner, Observer {
+                var isFollowing = viewModel.isFollowing(postOwnerUID)
+                if (isFollowing) {
+                    addFriendIV.setImageResource(R.drawable.ic_baseline_check_24)
+                    addFriendIV.setOnClickListener {
+                        addFriendIV.setImageResource(R.drawable.ic_baseline_person_add_24)
+                        viewModel.unfollow(meUID, postOwnerUID)
+                    }
+                }
+                else {
+                    addFriendIV.setImageResource(R.drawable.ic_baseline_person_add_24)
+                    addFriendIV.setOnClickListener {
+                        addFriendIV.setImageResource(R.drawable.ic_baseline_check_24)
+                        viewModel.follow(meUID, postOwnerUID)
+                    }
+                }
+            })
+            viewModel.fetchFollowing(meUID)
+        }
+
+
+
         // XXX bind tag
         // XXX bind location
         // XXX refine like
@@ -93,6 +127,26 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
 
 
+    }
+
+    override fun onResume() {
+        Log.d(javaClass.simpleName, "on resume")
+        super.onResume()
+    }
+
+    override fun onStop() {
+        Log.d(javaClass.simpleName, "on stop")
+        super.onStop()
+    }
+
+    override fun onPause() {
+        Log.d(javaClass.simpleName, "on pause")
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        Log.d(javaClass.simpleName, "on destroy")
+        super.onDestroy()
     }
 
 

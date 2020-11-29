@@ -12,6 +12,7 @@ import androidx.lifecycle.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import edu.utap.sharein.glide.Glide
+import edu.utap.sharein.model.Follow
 import edu.utap.sharein.model.Post
 import edu.utap.sharein.model.User
 import java.io.File
@@ -33,6 +34,8 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     private val dbHelp = ViewModelDBHelper(postsList)
     private var fetchStatus = MutableLiveData<Int>()
 
+    private var followingList = MutableLiveData<List<Follow>>()
+    private var followerList = MutableLiveData<List<Follow>>()
 
 
 
@@ -52,6 +55,10 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         value = mutableListOf()
     }
     private var likeCountsList = MutableLiveData<List<Int>>()
+
+
+
+
 
 
     ////////////////////////////////////////////////////////////////////////
@@ -240,7 +247,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     fun createPost(title: String, text: String, pictureUUIDs: List<String>, musicUUID: String): String {
         // create post and return postID
         val post = Post(
-                name = getUserName() ?: "",
+                name = currUser.value?.name!!,
                 ownerUid = myUid()!!,
                 title = title,
                 text = text,
@@ -294,11 +301,20 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
 
 
+
+
     fun fetchUser(uid: String) {
 
         dbHelp.dbFetchUser(currUser, currUserId,  uid)
 
         Log.d(javaClass.simpleName, "currUser value is ${currUser.value}")
+    }
+
+    fun fetchOtherUser(uid: String): User? {
+        var otherUser = MutableLiveData<User>()
+        var otherUserUID = MutableLiveData<String>()
+        dbHelp.dbFetchUser(otherUser, otherUserUID, uid)
+        return otherUser.value
     }
 
     fun fetchOwner(imageView: ImageView, uid: String) {
@@ -309,10 +325,14 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
     fun createUser() {
         Log.d(javaClass.simpleName, "createUser is called")
+
+
+
         val user = User(
                 name = getEmail()?.substringBefore("@") ?: "",
                 email = getEmail() ?: "",
                 uid = FirebaseAuth.getInstance().currentUser?.uid!!
+
                 )
         Log.d(javaClass.simpleName, "user uid ${user.uid}")
         currUser.value = user
@@ -340,11 +360,78 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         currUserId.value = null
         val list: List<Post> = listOf()
         postsList.value = list
-//        profilePhotoUUID = ""
+        profilePhotoUUID = ""
     }
 
 
     ////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////////////////////////
+    /*
+     Deal with follow
+     */
+
+    fun observeFollowing(): LiveData<List<Follow>> {
+        return followingList
+    }
+    fun observeFollower(): LiveData<List<Follow>> {
+        return followerList
+    }
+
+    fun resetFollowingList() {
+        followingList.value = listOf()
+    }
+
+    fun resetFollowerList() {
+        followerList.value = listOf()
+    }
+
+    fun fetchAllFollow(followList: MutableLiveData<List<Follow>>) {
+        dbHelp.dbFetchAllFollow(followList)
+    }
+
+    fun fetchFollowing(followerUID: String) {
+        dbHelp.dbFetchFollowing(followerUID, followingList)
+        Log.d(javaClass.simpleName, "fetch following size is ${followingList.value?.size}")
+    }
+    fun fetchFollower(followingUID: String) {
+        dbHelp.dbFetchFollower(followingUID, followerList)
+    }
+    fun follow(followerUID: String, followingUID: String) {
+        val follow = Follow (
+            follower = followerUID,
+            following = followingUID
+        )
+        dbHelp.follow(follow)
+    }
+    fun unfollow(followerUID: String, followingUID: String) {
+
+
+        var follow: Follow? = null
+
+        for (f in followingList.value!!) {
+            if (f.follower == followerUID && f.following == followingUID) {
+                follow = f
+            }
+        }
+        if (follow != null) {
+            dbHelp.unfollow(follow)
+        }
+    }
+    fun isFollowing(followingUID: String): Boolean {
+        // return true if follower is following following
+
+
+        Log.d(javaClass.simpleName, "list is ${followingList.value}")
+        if (followerList == null || followingList.value == null) return false
+        for (f in followingList.value!!) {
+            if (f.following == followingUID) return true
+        }
+        return false
+    }
+
+
 
 
     ////////////////////////////////////////////////////////////////////////

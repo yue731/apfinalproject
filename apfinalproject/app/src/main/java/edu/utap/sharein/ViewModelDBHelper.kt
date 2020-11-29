@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import edu.utap.sharein.glide.Glide
+import edu.utap.sharein.model.Follow
 import edu.utap.sharein.model.Post
 import edu.utap.sharein.model.User
 
@@ -221,6 +222,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                     Log.d(javaClass.simpleName, "user fetch profile photo ${u.name}")
                 } else {
                     Log.d(javaClass.simpleName, "user fetch profile photo failed")
+                    imageView.setImageResource(R.drawable.profile)
                 }
 
 
@@ -257,5 +259,79 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                     Log.d(javaClass.simpleName, "User update FAILED id ${user.uid} name ${user.name}")
                     Log.d(javaClass.simpleName, "Error ", it)
                 }
+    }
+
+    /*
+     Deal with follow
+     */
+    fun dbFetchAllFollow(followList: MutableLiveData<List<Follow>>) {
+        db.collection("follow")
+            .get()
+            .addOnSuccessListener { result ->
+                followList.value = result.documents.mapNotNull {
+                    it.toObject(Follow::class.java)
+                }
+            }
+            .addOnFailureListener {
+
+            }
+    }
+    fun dbFetchFollowing(followerUID: String, followingList: MutableLiveData<List<Follow>>) {
+        // given a user uid, fetch all users he/she is following
+        db.collection("follow")
+            .whereEqualTo("follower", followerUID)
+            .get()
+            .addOnSuccessListener {result ->
+                followingList.value = result.documents.mapNotNull {
+                    it.toObject(Follow::class.java)
+                }
+                Log.d(javaClass.simpleName, "fetch following success size is ${followingList.value!!.size}")
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "fetch following FAILED")
+            }
+
+    }
+
+    fun dbFetchFollower(followingUID: String, followersList: MutableLiveData<List<Follow>>) {
+        // given a user uid, fetch all his/her followers
+        db.collection("follow")
+            .whereEqualTo("following", followingUID)
+            .get()
+            .addOnSuccessListener { result ->
+                followersList.value = result.documents.mapNotNull {
+                    it.toObject(Follow::class.java)
+                }
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "fetch follower FAILED")
+            }
+    }
+
+    fun follow(follow: Follow) {
+        follow.followID = db.collection("follow").document().id
+        db.collection("follow")
+            .document(follow.followID)
+            .set(follow)
+            .addOnSuccessListener {
+                Log.d(javaClass.simpleName, "follow success")
+
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "follow failed")
+            }
+    }
+
+    fun unfollow(follow: Follow) {
+        db.collection("follow")
+            .document(follow.followID)
+            .delete()
+            .addOnSuccessListener {
+                Log.d(javaClass.simpleName, "unfollow success")
+
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "unfollow failed")
+            }
     }
 }

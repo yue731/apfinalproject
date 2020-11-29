@@ -71,13 +71,32 @@
         app:layout_constraintTop_toTopOf="@+id/meProfilePhotoIV"
         app:layout_constraintBottom_toBottomOf="@+id/meProfilePhotoIV"/>
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/meFollowIcon"
+        android:src="@drawable/ic_baseline_person_add_24"
+        app:layout_constraintStart_toStartOf="@+id/followerText"
+        app:layout_constraintTop_toBottomOf="@+id/followerText"
+        android:layout_marginTop="10dp"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mePrivateMessage"
+        android:src="@drawable/ic_baseline_chat_24"
+
+        app:layout_constraintEnd_toEndOf="@+id/meFollower"
+        app:layout_constraintBottom_toBottomOf="@+id/meFollowIcon"/>
+
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:id="@+id/meRV"
         app:layout_constraintStart_toStartOf="@+id/meProfilePhotoIV"
-        app:layout_constraintTop_toBottomOf="@+id/meProfilePhotoIV"
+        app:layout_constraintTop_toBottomOf="@+id/meFollowIcon"
         android:layout_marginTop="50dp"/>
 
 
