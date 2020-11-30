@@ -129,7 +129,7 @@ class NewPostFragment : Fragment() {
                         findNavController().navigate(action)
                     }
                     else {
-                        val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationMe()
+                        val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationMe(-1, "Me", viewModel.observeUser().value!!.uid)
                         findNavController().navigate(action)
                     }
                 }
@@ -149,7 +149,7 @@ class NewPostFragment : Fragment() {
                     findNavController().navigate(action)
                 }
                 else {
-                    val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationMe()
+                    val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationMe(-1, "Me", viewModel.observeUser().value!!.uid)
                     findNavController().navigate(action)
                 }
                 true

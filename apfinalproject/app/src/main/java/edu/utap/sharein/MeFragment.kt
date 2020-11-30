@@ -1,7 +1,9 @@
 package edu.utap.sharein
 
 import android.app.AlertDialog
+import android.opengl.Visibility
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Button
 import android.widget.ImageView
@@ -11,15 +13,19 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import edu.utap.sharein.model.Follow
+import edu.utap.sharein.model.User
 import edu.utap.sharein.ui.home.HomeFragmentDirections
 
 
 class MeFragment : Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var postsAdapter: PostsAdapter
+    private val args: MeFragmentArgs by navArgs()
+    private var user = MutableLiveData<User>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -28,11 +34,18 @@ class MeFragment : Fragment() {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_me, container, false)
         setHasOptionsMenu(true)
+        if (args.position != -1) {
+            viewModel.updateFetchStatus(Constants.FETCH_OTHER_USER)
+            viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, args.uid)
+        }
+
         return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
 
         val meProfilePhotoIV = view.findViewById<ImageView>(R.id.meProfilePhotoIV)
         val meUserName = view.findViewById<TextView>(R.id.meUserName)
@@ -40,16 +53,72 @@ class MeFragment : Fragment() {
         val meFollower = view.findViewById<TextView>(R.id.meFollower)
         val meToProfileBut = view.findViewById<Button>(R.id.meToProfileBut)
         val meRV = view.findViewById<RecyclerView>(R.id.meRV)
+        val meFollowIcon = view.findViewById<ImageView>(R.id.meFollowIcon)
+        val mePrivateMessage = view.findViewById<ImageView>(R.id.mePrivateMessage)
 
-        val user = viewModel.observeUser().value
-        if (user != null && user.profilePhotoUUID != "") {
-            viewModel.glideFetch(user.profilePhotoUUID, meProfilePhotoIV)
+        user.observe(viewLifecycleOwner, Observer {
+            meUserName.text = user.value!!.name
+            // XXX wrtie about following and on click listener to list of following
+
+            viewModel.resetFollowingList()
+            viewModel.fetchFollowing(user.value!!.uid)
+
+            // XXX write about follower and on click listener to list of follower
+            viewModel.resetFollowerList()
+            viewModel.fetchFollower(user.value!!.uid)
+
+            if (user.value != null && user.value!!.profilePhotoUUID != "") {
+                viewModel.glideFetch(user.value!!.profilePhotoUUID, meProfilePhotoIV)
+            }
+
+            // handle follow
+            val currUserUID = viewModel.observeUser().value!!.uid
+            val userUID = user.value!!.uid
+            if (args.position != -1) {
+                viewModel.resetFollowerList()
+                viewModel.observeFollower().observe(viewLifecycleOwner, Observer {
+                    var isFollower = viewModel.isFollower(currUserUID)
+                    if (isFollower) {
+                        meFollowIcon.setImageResource(R.drawable.ic_baseline_check_24)
+                        meFollowIcon.setOnClickListener {
+                           // meFollowIcon.setImageResource(R.drawable.ic_baseline_person_add_24)
+                            viewModel.unfollow(user.value!!, currUserUID, userUID)
+                            viewModel.fetchFollower(userUID)
+                        }
+                    }
+                    else {
+                        meFollowIcon.setImageResource(R.drawable.ic_baseline_person_add_24)
+                        meFollowIcon.setOnClickListener {
+                           // meFollowIcon.setImageResource(R.drawable.ic_baseline_check_24)
+                            viewModel.follow(currUserUID, userUID)
+                            viewModel.fetchFollower(userUID)
+                        }
+                    }
+                })
+                viewModel.fetchFollower(userUID)
+            }
+
+            // handle rv bind
+            meRV.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+            postsAdapter = PostsAdapter(viewModel, ::viewPost, ::editDeleteAlert)
+            meRV.adapter = postsAdapter
+
+            viewModel.observePosts().observe(viewLifecycleOwner, Observer {
+                postsAdapter.clearAll()
+
+                postsAdapter.addAll(it)
+                postsAdapter.notifyDataSetChanged()
+            })
+
+        })
+
+        if (args.position != -1) {
+            viewModel.fetchOtherUser(args.uid, user)
         }
-        meUserName.text = user?.name
-        // XXX wrtie about following and on click listener to list of following
+        else {
+            user.value = viewModel.observeUser().value
+        }
 
-        viewModel.resetFollowingList()
-        viewModel.fetchFollowing(user!!.uid)
         viewModel.observeFollowing().observe(viewLifecycleOwner, Observer {
             if (viewModel.observeFollowing().value == null) {
                 meFollowing.text = "0"
@@ -60,11 +129,10 @@ class MeFragment : Fragment() {
         })
 
         meFollowing.setOnClickListener {
-
+            val action = MeFragmentDirections.actionNavigationMeToNavigationFollow(Constants.FOLLOWING)
+            findNavController().navigate(action)
         }
-        // XXX write about follower and on click listener to list of follower
-        viewModel.resetFollowerList()
-        viewModel.fetchFollower(user!!.uid)
+
         viewModel.observeFollower().observe(viewLifecycleOwner, Observer {
             if (viewModel.observeFollower().value == null) {
                 meFollower.text = "0"
@@ -76,41 +144,68 @@ class MeFragment : Fragment() {
 
 
         meFollower.setOnClickListener {
-
-        }
-
-        meToProfileBut.setOnClickListener {
-            val action = MeFragmentDirections.actionNavigationMeToNavigationProfile()
+            val action = MeFragmentDirections.actionNavigationMeToNavigationFollow(Constants.FOLLOWER)
             findNavController().navigate(action)
         }
 
-        meRV.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        postsAdapter = PostsAdapter(viewModel, ::viewPost, ::editDeleteAlert)
-        meRV.adapter = postsAdapter
-        viewModel.observePosts().observe(viewLifecycleOwner, Observer {
-            postsAdapter.clearAll()
 
-            postsAdapter.addAll(it)
-            postsAdapter.notifyDataSetChanged()
-        })
+
+        if (args.position == -1) {
+            meFollowIcon.isClickable = false
+            meFollowIcon.visibility = View.INVISIBLE
+            mePrivateMessage.isClickable = false
+            mePrivateMessage.visibility = View.INVISIBLE
+            meToProfileBut.setOnClickListener {
+                val action = MeFragmentDirections.actionNavigationMeToNavigationProfile()
+                findNavController().navigate(action)
+            }
+        }
+        else {
+
+            meToProfileBut.isClickable = false
+            meToProfileBut.visibility = View.INVISIBLE
+
+        }
+
+
 
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.me_menu_top, menu)
+        if (args.position == -1) {
+            inflater.inflate(R.menu.me_menu_top, menu)
+        }
+        else {
+            inflater.inflate(R.menu.me_other_menu_top, menu)
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.mePosts -> {
-                viewModel.updateFetchStatus(Constants.FETCH_CURR_USER_POSTS)
-                viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
-                true
+        if (args.position == -1) {
+            return when (item.itemId) {
+                R.id.mePosts -> {
+                    viewModel.updateFetchStatus(Constants.FETCH_CURR_USER_POSTS)
+                    viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
+                    true
+                }
+                R.id.meLiked -> {
+                    true
+                }
+                else -> super.onOptionsItemSelected(item)
+        }
+
+        }
+        else {
+            return when (item.itemId) {
+                R.id.meOtherBack -> {
+                    findNavController().popBackStack()
+                    findNavController().popBackStack()
+                    true
+                }
+                else -> super.onOptionsItemSelected(item)
             }
-            R.id.meLiked -> {
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+
         }
 
     }
@@ -175,5 +270,10 @@ class MeFragment : Fragment() {
         val postOwner = post.ownerUid
         val currUser = viewModel.observeUser().value
         return (currUser != null && postOwner == currUser.uid)
+    }
+
+    override fun onDestroy() {
+        Log.d(javaClass.simpleName, "destroy")
+        super.onDestroy()
     }
 }

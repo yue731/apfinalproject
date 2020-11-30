@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.lifecycle.*
@@ -41,6 +42,8 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
     private var currUserId = MutableLiveData<String>()
     private var currUser = MutableLiveData<User>()
+
+    private var otherUser = MutableLiveData<User>()
 
 
     private lateinit var storage: Storage
@@ -203,9 +206,19 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         return postsList.value.isNullOrEmpty()
     }
 
-    fun fetchPosts(status: Int) {
+    fun fetchPosts(status: Int, uid: String?) {
         when(status) {
             Constants.FETCH_FOLLOW -> {
+
+
+                if (followingList.value != null) {
+                    var list = mutableListOf<String>()
+                    for (f in followingList.value!!) {
+                        list.add(f.following)
+                    }
+                    Log.d(javaClass.simpleName, "list size is ${list.size}")
+                    dbHelp.dbFetchPostsFollow(list, postsList)
+                }
 
             }
             Constants.FETCH_TRENDING -> {
@@ -216,13 +229,16 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
             }
             Constants.FETCH_CURR_USER_POSTS -> {
                 if (currUser.value != null) {
-                    dbHelp.dbFetchPostsCurrUser(currUser.value!!.uid, postsList)
+                    dbHelp.dbFetchPostsUser(currUser.value!!.uid, postsList)
 
                 }
 
             }
             Constants.FETCH_LIKED -> {
 
+            }
+            Constants.FETCH_OTHER_USER -> {
+                dbHelp.dbFetchPostsUser(uid!!, postsList)
             }
         }
 
@@ -310,11 +326,13 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         Log.d(javaClass.simpleName, "currUser value is ${currUser.value}")
     }
 
-    fun fetchOtherUser(uid: String): User? {
-        var otherUser = MutableLiveData<User>()
+    fun fetchOtherUser(uid: String, user: MutableLiveData<User>) {
         var otherUserUID = MutableLiveData<String>()
-        dbHelp.dbFetchUser(otherUser, otherUserUID, uid)
-        return otherUser.value
+        dbHelp.dbFetchUser(user, otherUserUID, uid)
+    }
+
+    fun fetchUserName(uid: String, view: TextView) {
+        dbHelp.dbFetchUserName(uid, view)
     }
 
     fun fetchOwner(imageView: ImageView, uid: String) {
@@ -405,16 +423,28 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         )
         dbHelp.follow(follow)
     }
-    fun unfollow(followerUID: String, followingUID: String) {
+    fun unfollow(user: User, followerUID: String, followingUID: String) {
 
 
         var follow: Follow? = null
+        if (user.uid == currUser.value!!.uid) {
+            for (f in followingList.value!!) {
 
-        for (f in followingList.value!!) {
-            if (f.follower == followerUID && f.following == followingUID) {
-                follow = f
+                if (f.follower == followerUID && f.following == followingUID) {
+                    follow = f
+                }
             }
         }
+        else {
+            for (f in followerList.value!!) {
+
+                if (f.follower == followerUID && f.following == followingUID) {
+                    follow = f
+                }
+            }
+        }
+
+
         if (follow != null) {
             dbHelp.unfollow(follow)
         }
@@ -424,9 +454,17 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
 
         Log.d(javaClass.simpleName, "list is ${followingList.value}")
-        if (followerList == null || followingList.value == null) return false
+        if (followingList == null || followingList.value == null) return false
         for (f in followingList.value!!) {
             if (f.following == followingUID) return true
+        }
+        return false
+    }
+
+    fun isFollower(followerUID: String): Boolean {
+        if (followerList == null || followerList.value == null) return false
+        for (f in followerList.value!!) {
+            if (f.follower == followerUID) return true
         }
         return false
     }

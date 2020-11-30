@@ -2,6 +2,7 @@ package edu.utap.sharein.ui.home
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Button
 import androidx.fragment.app.Fragment
@@ -91,11 +92,21 @@ class HomeFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.follow -> {
+                viewModel.updateFetchStatus(Constants.FETCH_FOLLOW)
+                viewModel.resetFollowingList()
+                viewModel.observeFollowing().observe(viewLifecycleOwner, Observer {
+                    Log.d(javaClass.simpleName, "following list is changed size is ${viewModel.observeFollowing().value!!.size}")
+                    if (it.size != 0) {
+                        viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
+                    }
+
+                })
+                viewModel.fetchFollowing(viewModel.observeUser().value!!.uid)
                 true
             }
             R.id.trending -> {
                 viewModel.updateFetchStatus(Constants.FETCH_TRENDING)
-                viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
+                viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
                 true
             }
             R.id.nearby -> {

@@ -89,13 +89,19 @@
             app:destination="@+id/navigation_home"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_navigation_one_post_to_navigation_me"
+            app:destination="@+id/navigation_me"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+
 
     </fragment>
 
     <fragment
         android:id="@+id/navigation_me"
         android:name="edu.utap.sharein.MeFragment"
-        android:label="Me"
+        android:label="{title}"
         tools:layout="@layout/fragment_me">
         <action
             android:id="@+id/action_navigation_me_to_navigation_profile"
@@ -112,8 +118,45 @@
             app:destination="@+id/navigation_new_post"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_navigation_me_to_navigation_follow"
+            app:destination="@+id/navigation_follow"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+        <argument
+            android:name="position"
+            app:argType="integer"
+            android:defaultValue="-1"/>
+        <argument
+            android:name="title"
+            app:argType="string"
+            android:defaultValue="Me" />
+        <argument
+            android:name="uid"
+            app:argType="string"
+            android:defaultValue=""
+            />
 
 
     </fragment>
+
+    <fragment
+        android:id="@+id/navigation_follow"
+        android:name="edu.utap.sharein.FollowFragment"
+        android:label="Follow"
+        tools:layout="@layout/fragment_follow">
+        <action
+            android:id="@+id/action_navigation_follow_to_navigation_me"
+            app:destination="@+id/navigation_me"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+        <argument
+            android:name="mode"
+            app:argType="integer"
+            android:defaultValue="-1"/>
+
+    </fragment>
+
+
 
 </navigation>

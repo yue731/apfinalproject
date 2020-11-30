@@ -2,6 +2,7 @@ package edu.utap.sharein
 
 import android.util.Log
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -46,21 +47,23 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                 }
     }
 
-    fun dbFetchPostsFollow(followers: List<String>, postsList: MutableLiveData<List<Post>>) {
+    fun dbFetchPostsFollow(followings: List<String>, postsList: MutableLiveData<List<Post>>) {
         db.collection("allPosts")
             .orderBy("timeStamp", Query.Direction.DESCENDING)
-            .whereIn("ownerUid", followers)
+            .whereIn("ownerUid", followings)
             .limit(100)
             .get()
-            .addOnSuccessListener {
-
+            .addOnSuccessListener {result ->
+                postsList.value = result.documents.mapNotNull {
+                    it.toObject(Post::class.java)
+                }
             }
             .addOnFailureListener {
 
             }
     }
 
-    fun dbFetchPostsCurrUser(uid: String, postsList: MutableLiveData<List<Post>>) {
+    fun dbFetchPostsUser(uid: String, postsList: MutableLiveData<List<Post>>) {
         db.collection("allPosts")
             .orderBy("timeStamp", Query.Direction.DESCENDING)
             .whereEqualTo("ownerUid", uid)
@@ -100,7 +103,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
 
                         }
                         Constants.FETCH_CURR_USER_POSTS -> {
-                            dbFetchPostsCurrUser(post.ownerUid, postsList)
+                            dbFetchPostsUser(post.ownerUid, postsList)
                         }
                         Constants.FETCH_LIKED -> {
 
@@ -140,7 +143,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
 
                         }
                         Constants.FETCH_CURR_USER_POSTS -> {
-                            dbFetchPostsCurrUser(post.ownerUid, postsList)
+                            dbFetchPostsUser(post.ownerUid, postsList)
                         }
                         Constants.FETCH_LIKED -> {
 
@@ -171,7 +174,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
 
                         }
                         Constants.FETCH_CURR_USER_POSTS -> {
-                            dbFetchPostsCurrUser(post.ownerUid, postsList)
+                            dbFetchPostsUser(post.ownerUid, postsList)
                         }
                         Constants.FETCH_LIKED -> {
 
@@ -205,6 +208,20 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                     currUser.value = null
                     currUserId.value = uid
                 }
+
+    }
+
+    fun dbFetchUserName(uid: String, view: TextView) {
+        db.collection("allUsers")
+            .document(uid)
+            .get()
+            .addOnSuccessListener { result ->
+                view.text = result.toObject(User::class.java)!!.name
+
+            }
+            .addOnFailureListener {
+                view.text = "Unknown"
+            }
 
     }
 

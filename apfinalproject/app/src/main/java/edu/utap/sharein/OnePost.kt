@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -54,7 +55,17 @@ class OnePost: Fragment(R.layout.one_post_view) {
         val post = viewModel.getPost(position)
         //  to bind profile photo
         viewModel.fetchOwner(profilePhotoIV, post.ownerUid) // fetch post owner and bind profile photo to image view
+        profilePhotoIV.setOnClickListener {
+            if (post.ownerUid == viewModel.observeUser().value!!.uid) {
+                val action = OnePostDirections.actionNavigationOnePostToNavigationMe(-1, "Me", viewModel.observeUser().value!!.uid)
+                findNavController().navigate(action)
+            }
+            else {
+                val action = OnePostDirections.actionNavigationOnePostToNavigationMe(position, "", post.ownerUid)
+                findNavController().navigate(action)
+            }
 
+        }
         userNameTV.text = post.name
 
         //  bind photos swipe
@@ -90,7 +101,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
                     addFriendIV.setImageResource(R.drawable.ic_baseline_check_24)
                     addFriendIV.setOnClickListener {
                         addFriendIV.setImageResource(R.drawable.ic_baseline_person_add_24)
-                        viewModel.unfollow(meUID, postOwnerUID)
+                        viewModel.unfollow(viewModel.observeUser().value!!, meUID, postOwnerUID)
                     }
                 }
                 else {

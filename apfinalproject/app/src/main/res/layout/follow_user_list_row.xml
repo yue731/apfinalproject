@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/followUserContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/followUserProfileIV"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        app:layout_constraintStart_toStartOf="@+id/followUserContainer"
+        app:layout_constraintTop_toTopOf="@+id/followUserContainer" />
+
+    <TextView
+        android:id="@+id/followUserName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="username"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@+id/followUserContainer"
+        app:layout_constraintStart_toEndOf="@id/followUserProfileIV"
+        app:layout_constraintTop_toTopOf="@+id/followUserContainer" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

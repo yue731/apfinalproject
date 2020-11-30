@@ -66,11 +66,11 @@ class MainActivity : AppCompatActivity() {
             when (destination.id) {
                 R.id.navigation_home -> {
                     viewModel.updateFetchStatus(Constants.FETCH_TRENDING)
-                    viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
+                    viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
                 }
                 R.id.navigation_me -> {
                     viewModel.updateFetchStatus(Constants.FETCH_CURR_USER_POSTS)
-                    viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
+                    viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
                 }
             }
         }
@@ -226,7 +226,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         Log.d(javaClass.simpleName, "mainactivity resumed")
-        viewModel.fetchPosts(viewModel.observeFetchStatus().value!!)
+        viewModel.updateFetchStatus(Constants.FETCH_TRENDING)
+        viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
 
         val currUserUID =viewModel.myUid()
 
