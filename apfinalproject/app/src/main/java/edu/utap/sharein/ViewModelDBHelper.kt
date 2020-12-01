@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import edu.utap.sharein.glide.Glide
 import edu.utap.sharein.model.Follow
+import edu.utap.sharein.model.Like
 import edu.utap.sharein.model.Post
 import edu.utap.sharein.model.User
 
@@ -16,7 +17,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
 
 
     init {
-        dbFetchPostsTrending(postsList)
+        dbFetchPostsAll(postsList)
 
     }
 
@@ -31,7 +32,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
     /*
      Interact with cloud firestore
      */
-    fun dbFetchPostsTrending(postsList: MutableLiveData<List<Post>>) {
+    fun dbFetchPostsAll(postsList: MutableLiveData<List<Post>>) {
         db.collection("allPosts")
                 .orderBy("timeStamp", Query.Direction.DESCENDING) // descending
                 .limit(100)
@@ -96,11 +97,11 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                         Constants.FETCH_FOLLOW -> {
 
                         }
-                        Constants.FETCH_TRENDING -> {
-                            dbFetchPostsTrending(postsList)
+                        Constants.FETCH_ALL -> {
+                            dbFetchPostsAll(postsList)
                         }
-                        Constants.FETCH_NEARBY -> {
-
+                        Constants.FETCH_TREND -> {
+                            dbFetchTrend(postsList)
                         }
                         Constants.FETCH_CURR_USER_POSTS -> {
                             dbFetchPostsUser(post.ownerUid, postsList)
@@ -135,12 +136,12 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                         Constants.FETCH_FOLLOW -> {
 
                         }
-                        Constants.FETCH_TRENDING -> {
-                            Log.d("create new", "fetch trending")
-                            dbFetchPostsTrending(postsList)
+                        Constants.FETCH_ALL -> {
+                            Log.d("create new", "fetch all")
+                            dbFetchPostsAll(postsList)
                         }
-                        Constants.FETCH_NEARBY -> {
-
+                        Constants.FETCH_TREND -> {
+                            dbFetchTrend(postsList)
                         }
                         Constants.FETCH_CURR_USER_POSTS -> {
                             dbFetchPostsUser(post.ownerUid, postsList)
@@ -167,11 +168,11 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                         Constants.FETCH_FOLLOW -> {
 
                         }
-                        Constants.FETCH_TRENDING -> {
-                            dbFetchPostsTrending(postsList)
+                        Constants.FETCH_ALL -> {
+                            dbFetchPostsAll(postsList)
                         }
-                        Constants.FETCH_NEARBY -> {
-
+                        Constants.FETCH_TREND -> {
+                            dbFetchTrend(postsList)
                         }
                         Constants.FETCH_CURR_USER_POSTS -> {
                             dbFetchPostsUser(post.ownerUid, postsList)
@@ -325,7 +326,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
             }
     }
 
-    fun follow(follow: Follow) {
+    fun dbFollow(follow: Follow) {
         follow.followID = db.collection("follow").document().id
         db.collection("follow")
             .document(follow.followID)
@@ -339,7 +340,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
             }
     }
 
-    fun unfollow(follow: Follow) {
+    fun dbUnfollow(follow: Follow) {
         db.collection("follow")
             .document(follow.followID)
             .delete()
@@ -351,4 +352,191 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                 Log.d(javaClass.simpleName, "unfollow failed")
             }
     }
+
+    /*
+     Deal with Like
+     */
+
+    fun dbFetchTrend(postsList: MutableLiveData<List<Post>>) {
+        db.collection("allPosts")
+            .orderBy("timeStamp", Query.Direction.DESCENDING) // descending
+            .limit(100)
+            .get()
+            .addOnSuccessListener { result ->
+                postsList.value = result.documents.mapNotNull {
+                    it.toObject(Post::class.java)
+                }
+                var postIDList = mutableListOf<String>()
+                if (postsList.value!!.size != 0) {
+                    for (post in postsList.value!!) {
+                        postIDList.add(post.postID)
+                    }
+                    var likesCountList = mutableListOf<Int>()
+                    db.collection("like")
+                        .whereIn("postID", postIDList)
+                        .get()
+                        .addOnSuccessListener { result ->
+                            var likes = MutableLiveData<List<Like>>()
+                            likes.value = result.documents.mapNotNull {
+                                it.toObject(Like::class.java)
+                            }
+                            if (likes.value!!.size != 0) {
+                                for (pid in postIDList) {
+                                    var count = 0
+                                    for (l in likes.value!!) {
+                                        if (l.postID == pid) {
+                                            count++
+                                        }
+                                    }
+                                    likesCountList.add(count)
+                                }
+
+                                var pairList = mutableListOf<Pair<Post, Int>>()
+                                for (i in 0 until postIDList.size) {
+                                    pairList.add(Pair(postsList.value!![i], likesCountList[i]))
+                                }
+                                pairList.sortBy {
+                                    it.second
+                                }
+                                pairList.reverse()
+                                var sortedPostList = mutableListOf<Post>()
+                                for (pair in pairList) {
+                                    sortedPostList.add(pair.first)
+                                }
+                                postsList.value = sortedPostList
+                            }
+
+                        }
+                        .addOnFailureListener{
+
+                        }
+
+
+                }
+
+
+
+            }
+            .addOnFailureListener {
+
+            }
+    }
+
+    fun dbFetchOnePostLikes(postID: String, likes: MutableLiveData<List<Like>>, count: TextView) {
+        db.collection("like")
+            .whereEqualTo("postID", postID)
+            .get()
+            .addOnSuccessListener { result ->
+                Log.d(javaClass.simpleName, "fetch one post likes success size is ${result.documents.size}")
+                likes.value = result.documents.mapNotNull {
+                    it.toObject(Like::class.java)
+                }
+                count.text = likes.value!!.size.toString()
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "fetch one post like FAILED")
+            }
+    }
+
+    fun dbFetchUserLikedPostsLikes(userUID: String, likes: MutableLiveData<List<Like>>, count: MutableLiveData<Int>) {
+        db.collection("like")
+            .whereEqualTo("userUID", userUID)
+            .get()
+            .addOnSuccessListener { result ->
+                Log.d(javaClass.simpleName, "fetch user liked post success size is ${result.documents.size}")
+                likes.value = result.documents.mapNotNull {
+                    it.toObject(Like::class.java)
+                }
+                count.value = likes.value!!.size
+
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "fetch user liked post FAILED")
+            }
+    }
+    fun dbFetchUserLikedPosts(userUID: String, likes: MutableLiveData<List<Like>>, postsList: MutableLiveData<List<Post>>) {
+        db.collection("like")
+            .whereEqualTo("userUID", userUID)
+            .get()
+            .addOnSuccessListener { result ->
+                Log.d(javaClass.simpleName, "fetch user liked post success size is ${result.documents.size}")
+                likes.value = result.documents.mapNotNull {
+                    it.toObject(Like::class.java)
+                }
+                if (likes.value!!.size != 0) {
+                    var list = mutableListOf<String>()
+                    for (l in likes.value!!) {
+                        list.add(l.postID)
+                    }
+                    db.collection("allPosts")
+                        .whereIn("postID", list)
+                        .get()
+                        .addOnSuccessListener { result ->
+                            postsList.value = result.documents.mapNotNull {
+                                it.toObject(Post::class.java)
+                            }
+                        }
+                        .addOnFailureListener {
+
+                        }
+                }
+
+
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "fetch user liked post FAILED")
+            }
+
+    }
+
+    fun dbFetchUserLikedPostsAndBind (userUID: String, likes: MutableLiveData<List<Like>>, post: Post, iv: ImageView) {
+        db.collection("like")
+            .whereEqualTo("userUID", userUID)
+            .get()
+            .addOnSuccessListener { result ->
+                Log.d(javaClass.simpleName, "fetch user liked post success size is ${result.documents.size}")
+                likes.value = result.documents.mapNotNull {
+                    it.toObject(Like::class.java)
+                }
+                if (likes.value!!.isNotEmpty()) {
+                    for (l in likes.value!!) {
+                        if (l.postID == post.postID) {
+                            iv.setImageResource(R.drawable.ic_baseline_favorite_24)
+                            return@addOnSuccessListener
+                        }
+
+                    }
+                }
+                iv.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "fetch user liked post FAILED")
+            }
+    }
+
+    fun dbLike(like: Like) {
+        like.likeID = db.collection("like").document().id
+        db.collection("like")
+            .document(like.likeID)
+            .set(like)
+            .addOnSuccessListener {
+                Log.d(javaClass.simpleName, "like success")
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "like FAILED")
+            }
+    }
+
+    fun dbUnlike(like: Like) {
+        db.collection("like")
+            .document(like.likeID)
+            .delete()
+            .addOnSuccessListener {
+                Log.d(javaClass.simpleName, "unlike success")
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "unlike FAILED")
+            }
+    }
+
 }

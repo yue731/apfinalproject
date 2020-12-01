@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import edu.utap.sharein.glide.Glide
 import edu.utap.sharein.model.Follow
+import edu.utap.sharein.model.Like
 import edu.utap.sharein.model.Post
 import edu.utap.sharein.model.User
 import java.io.File
@@ -43,7 +44,12 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     private var currUserId = MutableLiveData<String>()
     private var currUser = MutableLiveData<User>()
 
-    private var otherUser = MutableLiveData<User>()
+    private var currPageUser = MutableLiveData<User>()
+    // create a stack to store users
+    private var userStack = MutableLiveData<Stack<User>>().apply {
+        value = Stack()
+    }
+
 
 
     private lateinit var storage: Storage
@@ -54,14 +60,11 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     private var profilePhotoUUID: String = ""
     private var allImages = MutableLiveData<List<String>>()
 
-    private var likedList = MutableLiveData<List<Post>>().apply {
-        value = mutableListOf()
-    }
-    private var likeCountsList = MutableLiveData<List<Int>>()
-
-
-
-
+    private var onePostLikes = MutableLiveData<List<Like>>()
+    private var allPostsLikes = MutableLiveData<List<Int>>()
+    private var postLikes = MutableLiveData<Int>()
+    private var userLikedPosts = MutableLiveData<List<Like>>()
+    private var userLikedPostsCount = MutableLiveData<Int>()
 
 
     ////////////////////////////////////////////////////////////////////////
@@ -69,41 +72,94 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
      Deal with liked posts
      */
 
-    fun observeLiked(): LiveData<List<Post>> {
-        return likedList
+    fun observeOnePostLikes(): LiveData<List<Like>> {
+        return onePostLikes
+    }
+    fun observePostsLikes(): LiveData<Int> {
+        return postLikes
+    }
+    fun observeUserLikedPosts(): LiveData<List<Like>> {
+        return userLikedPosts
+    }
+    fun observeUserLikedPostsCount(): LiveData<Int> {
+        return userLikedPostsCount
+    }
+    fun resetOnePostLikes() {
+        onePostLikes.value = listOf()
+    }
+    fun resetPostsLikes() {
+        postLikes.value = 0
+    }
+    fun resetUserLikedPosts() {
+        userLikedPosts.value = listOf()
+    }
+    fun resetUserLikedPostsCount() {
+        userLikedPostsCount.value = 0
+    }
+    fun fetchOnePostLikes(postID: String, count: TextView) {
+        dbHelp.dbFetchOnePostLikes(postID, onePostLikes, count)
+    }
+    fun fetchUserLikedPostsLikes(userUID: String) {
+        dbHelp.dbFetchUserLikedPostsLikes(userUID, userLikedPosts, userLikedPostsCount)
     }
 
-    fun addLiked(post: Post) {
-        val localList = likedList.value?.toMutableList()
-        localList.let {
-            if (it == null || it.size == 0) {
+    fun fetchUserLikedPostsAndBind(userUID: String, post: Post, iv: ImageView) {
+        dbHelp.dbFetchUserLikedPostsAndBind(userUID, userLikedPosts, post, iv)
+    }
+    fun fetchUserLikedPosts(userUID: String) {
+        dbHelp.dbFetchUserLikedPosts(userUID, userLikedPosts, postsList)
+    }
 
 
+
+    fun pushUser() {
+        userStack.value!!.push(currPageUser.value!!)
+    }
+
+    fun popUser() {
+        currPageUser.value = userStack.value!!.pop()
+    }
+
+    fun setCurrPageUser(user: User) {
+        currPageUser.value = user
+    }
+
+    fun getCurrPageUser(): User {
+        return currPageUser.value!!
+    }
+
+    fun like(postID: String) {
+        val like = Like (
+            userUID = currUser.value!!.uid,
+            postID = postID
+        )
+        dbHelp.dbLike(like)
+    }
+    fun unlike(postID: String) {
+        var like: Like? = null
+        for (l in userLikedPosts.value!!) {
+            if (l.postID == postID && l.userUID == currUser.value!!.uid) {
+                like = l
             }
         }
+        if (like != null) {
+            dbHelp.dbUnlike(like)
+        }
     }
+    fun isLiked(postID: String): Boolean {
+        if (userLikedPosts == null || userLikedPosts.value == null) return false
+        for (l in userLikedPosts.value!!) {
+            if (l.postID == postID) return true
+        }
+        return false
+    }
+
+
+
 
 
     ////////////////////////////////////////////////////////////////////////
 
-
-    ////////////////////////////////////////////////////////////////////////
-    /*
-     Deal with like counts
-     XXX to write
-     */
-
-    fun observeLikeCounts(position: Int): LiveData<List<Int>> {
-        return likeCountsList
-    }
-
-    fun incrementLikeCounts(position: Int) {
-
-    }
-
-    fun decrementLikeCounts() {
-
-    }
 
 
     ////////////////////////////////////////////////////////////////////////
@@ -209,8 +265,6 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     fun fetchPosts(status: Int, uid: String?) {
         when(status) {
             Constants.FETCH_FOLLOW -> {
-
-
                 if (followingList.value != null) {
                     var list = mutableListOf<String>()
                     for (f in followingList.value!!) {
@@ -221,10 +275,12 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
                 }
 
             }
-            Constants.FETCH_TRENDING -> {
-                dbHelp.dbFetchPostsTrending(postsList)
+            Constants.FETCH_ALL -> {
+                dbHelp.dbFetchPostsAll(postsList)
             }
-            Constants.FETCH_NEARBY -> {
+            Constants.FETCH_TREND -> {
+                dbHelp.dbFetchTrend(postsList)
+
 
             }
             Constants.FETCH_CURR_USER_POSTS -> {
@@ -235,7 +291,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
             }
             Constants.FETCH_LIKED -> {
-
+                fetchUserLikedPosts(currUser.value!!.uid)
             }
             Constants.FETCH_OTHER_USER -> {
                 dbHelp.dbFetchPostsUser(uid!!, postsList)
@@ -247,6 +303,10 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     fun getPost(position: Int): Post {
         val post = postsList.value?.get(position)
         return post!!
+    }
+
+    fun resetPosts() {
+        postsList.value = listOf()
     }
 
     // after we successfully modify the post, we need to re-fetch the content to update livedata
@@ -290,7 +350,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
 
     fun initFetchStatus() {
-        fetchStatus.value = Constants.FETCH_TRENDING
+        fetchStatus.value = Constants.FETCH_ALL
     }
     fun observeFetchStatus(): LiveData<Int> {
         return fetchStatus
@@ -379,6 +439,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         val list: List<Post> = listOf()
         postsList.value = list
         profilePhotoUUID = ""
+        currPageUser.value = null
     }
 
 
@@ -421,7 +482,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
             follower = followerUID,
             following = followingUID
         )
-        dbHelp.follow(follow)
+        dbHelp.dbFollow(follow)
     }
     fun unfollow(user: User, followerUID: String, followingUID: String) {
 
@@ -446,7 +507,7 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
 
         if (follow != null) {
-            dbHelp.unfollow(follow)
+            dbHelp.dbUnfollow(follow)
         }
     }
     fun isFollowing(followingUID: String): Boolean {

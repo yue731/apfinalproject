@@ -40,14 +40,14 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
         var titleTV: TextView = view.findViewById(R.id.titleTV)
         var postTV: TextView = view.findViewById(R.id.postTV)
-        var tagTV: TextView = view.findViewById(R.id.tagTV)
+
         var locationTV: TextView = view.findViewById(R.id.locationTVInPostView)
         // XXX to write music
         var likeIcon: ImageView = view.findViewById(R.id.onePostLikeIcon)
         var likeCount: TextView = view.findViewById(R.id.onePostLikeCount)
         var comment: ImageView = view.findViewById(R.id.onePostComment)
         var addFriendIV: ImageView = view.findViewById(R.id.addFriendIV)
-        var likeClicked: Boolean = false
+
 
 
 
@@ -64,7 +64,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
                 val action = OnePostDirections.actionNavigationOnePostToNavigationMe(position, "", post.ownerUid)
                 findNavController().navigate(action)
             }
-
+            //viewModel.pushUser()
         }
         userNameTV.text = post.name
 
@@ -94,45 +94,69 @@ class OnePost: Fragment(R.layout.one_post_view) {
             addFriendIV.isClickable = false
         }
         else {
+
             viewModel.resetFollowingList()
             viewModel.observeFollowing().observe(viewLifecycleOwner, Observer {
                 var isFollowing = viewModel.isFollowing(postOwnerUID)
+                Log.d(javaClass.simpleName, "following is true? ")
                 if (isFollowing) {
                     addFriendIV.setImageResource(R.drawable.ic_baseline_check_24)
                     addFriendIV.setOnClickListener {
-                        addFriendIV.setImageResource(R.drawable.ic_baseline_person_add_24)
+//                        addFriendIV.setImageResource(R.drawable.ic_baseline_person_add_24)
                         viewModel.unfollow(viewModel.observeUser().value!!, meUID, postOwnerUID)
+                        viewModel.fetchFollowing(meUID)
                     }
                 }
                 else {
                     addFriendIV.setImageResource(R.drawable.ic_baseline_person_add_24)
                     addFriendIV.setOnClickListener {
-                        addFriendIV.setImageResource(R.drawable.ic_baseline_check_24)
+//                        addFriendIV.setImageResource(R.drawable.ic_baseline_check_24)
                         viewModel.follow(meUID, postOwnerUID)
+                        viewModel.fetchFollowing(meUID)
                     }
                 }
             })
             viewModel.fetchFollowing(meUID)
         }
 
-
-
-        // XXX bind tag
-        // XXX bind location
         // XXX refine like
-        likeIcon.setOnClickListener {
-            if (!likeClicked) {
-                likeIcon.setImageResource(R.drawable.ic_baseline_favorite_24)
-                likeClicked = true
-                post.likes += 1
-            }
-            else {
-                likeIcon.setImageResource(R.drawable.ic_baseline_favorite_border_24)
-                likeClicked = false
-                post.likes -= 1
-            }
-        }
+        viewModel.resetOnePostLikes()
+        viewModel.resetUserLikedPosts()
+        viewModel.observeOnePostLikes().observe(viewLifecycleOwner, Observer { onePostLikes ->
+            viewModel.observeUserLikedPosts().observe(viewLifecycleOwner, Observer { userLikedPosts ->
+                var isLiked = viewModel.isLiked(post.postID)
+                Log.d(javaClass.simpleName, "this post is liked ${isLiked}")
+                if (isLiked) {
+                    likeIcon.setImageResource(R.drawable.ic_baseline_favorite_24)
+                    likeIcon.setOnClickListener {
+                        Log.d(javaClass.simpleName, "post is unliked")
+//                        likeIcon.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+                        viewModel.unlike(post.postID)
+                        likeCount.text = (onePostLikes.size - 1).toString()
+                        viewModel.fetchOnePostLikes(post.postID, likeCount)
+                        viewModel.fetchUserLikedPostsLikes(viewModel.observeUser().value!!.uid)
+                    }
+                }
+                else {
+                    likeIcon.setImageResource((R.drawable.ic_baseline_favorite_border_24))
+                    likeIcon.setOnClickListener {
+                        Log.d(javaClass.simpleName, "post is liked")
+//                        likeIcon.setImageResource(R.drawable.ic_baseline_favorite_24)
+                        viewModel.like(post.postID)
+                        likeCount.text = (onePostLikes.size + 1).toString()
+                        viewModel.fetchOnePostLikes(post.postID, likeCount)
+                        viewModel.fetchUserLikedPostsLikes(viewModel.observeUser().value!!.uid)
+                    }
+                }
+            })
 
+        })
+        viewModel.fetchOnePostLikes(post.postID, likeCount)
+        viewModel.fetchUserLikedPostsLikes(viewModel.observeUser().value!!.uid)
+
+
+
+        // XXX bind location
 
 
 

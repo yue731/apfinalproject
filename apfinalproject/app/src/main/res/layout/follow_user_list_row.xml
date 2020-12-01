@@ -23,6 +23,12 @@
         app:layout_constraintBottom_toBottomOf="@+id/followUserContainer"
         app:layout_constraintStart_toEndOf="@id/followUserProfileIV"
         app:layout_constraintTop_toTopOf="@+id/followUserContainer" />
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        app:layout_constraintStart_toStartOf="@id/followUserContainer"
+        app:layout_constraintBottom_toBottomOf="@+id/followUserProfileIV"
+        android:background="#D3D3D3" />
 
 
 

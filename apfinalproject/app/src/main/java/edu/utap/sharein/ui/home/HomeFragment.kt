@@ -75,6 +75,11 @@ class HomeFragment : Fragment() {
             postsAdapter.addAll(it)
             postsAdapter.notifyDataSetChanged()
         })
+//        viewModel.observeUser().observe(viewLifecycleOwner, Observer {
+//            viewModel.setCurrPageUser(it!!)
+//        })
+
+
 
         // set initial state
         toggleEmptyPosts()
@@ -99,17 +104,23 @@ class HomeFragment : Fragment() {
                     if (it.size != 0) {
                         viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
                     }
+                    else {
+                        viewModel.resetPosts()
+                    }
 
                 })
                 viewModel.fetchFollowing(viewModel.observeUser().value!!.uid)
                 true
             }
-            R.id.trending -> {
-                viewModel.updateFetchStatus(Constants.FETCH_TRENDING)
+            R.id.all -> {
+                viewModel.updateFetchStatus(Constants.FETCH_ALL)
+
                 viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
                 true
             }
-            R.id.nearby -> {
+            R.id.trend -> {
+                viewModel.updateFetchStatus(Constants.FETCH_TREND)
+                viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
                 true
             }
             R.id.search -> {
@@ -180,6 +191,11 @@ class HomeFragment : Fragment() {
         val postOwner = post.ownerUid
         val currUser = viewModel.observeUser().value
         return (currUser != null && postOwner == currUser.uid)
+    }
+
+    override fun onDestroy() {
+        Log.d(javaClass.simpleName, " destroy")
+        super.onDestroy()
     }
 
 

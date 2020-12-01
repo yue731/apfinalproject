@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { controller, destination, arguments ->
             when (destination.id) {
                 R.id.navigation_home -> {
-                    viewModel.updateFetchStatus(Constants.FETCH_TRENDING)
+                    viewModel.updateFetchStatus(Constants.FETCH_ALL)
                     viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
                 }
                 R.id.navigation_me -> {
@@ -226,7 +226,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         Log.d(javaClass.simpleName, "mainactivity resumed")
-        viewModel.updateFetchStatus(Constants.FETCH_TRENDING)
+        viewModel.updateFetchStatus(Constants.FETCH_ALL)
         viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
 
         val currUserUID =viewModel.myUid()

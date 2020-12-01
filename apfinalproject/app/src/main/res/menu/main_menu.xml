@@ -7,13 +7,13 @@
         android:orderInCategory="99"
         app:showAsAction="always" />
     <item
-        android:id="@+id/trending"
-        android:title="Trend"
+        android:id="@+id/all"
+        android:title="All"
         android:orderInCategory="100"
         app:showAsAction="always" />
     <item
-        android:id="@+id/nearby"
-        android:title="Nearby"
+        android:id="@+id/trend"
+        android:title="Trend"
         android:orderInCategory="101"
         app:showAsAction="always" />
     <item

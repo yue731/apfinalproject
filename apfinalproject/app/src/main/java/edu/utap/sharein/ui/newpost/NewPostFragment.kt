@@ -124,7 +124,7 @@ class NewPostFragment : Fragment() {
                     }
                     (activity as MainActivity?)?.hideKeyboard()
                     val status = viewModel.observeFetchStatus().value
-                    if (status == Constants.FETCH_FOLLOW || status == Constants.FETCH_TRENDING || status == Constants.FETCH_NEARBY) {
+                    if (status == Constants.FETCH_FOLLOW || status == Constants.FETCH_ALL || status == Constants.FETCH_TREND) {
                         val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationHome()
                         findNavController().navigate(action)
                     }
@@ -144,7 +144,7 @@ class NewPostFragment : Fragment() {
             R.id.cancelBut -> {
                 (activity as MainActivity?)?.hideKeyboard()
                 val status = viewModel.observeFetchStatus().value
-                if (status == Constants.FETCH_FOLLOW || status == Constants.FETCH_TRENDING || status == Constants.FETCH_NEARBY) {
+                if (status == Constants.FETCH_FOLLOW || status == Constants.FETCH_ALL || status == Constants.FETCH_TREND) {
                     val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationHome()
                     findNavController().navigate(action)
                 }

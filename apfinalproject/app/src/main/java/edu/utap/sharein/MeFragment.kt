@@ -1,7 +1,6 @@
 package edu.utap.sharein
 
 import android.app.AlertDialog
-import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -16,9 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import edu.utap.sharein.model.Follow
 import edu.utap.sharein.model.User
-import edu.utap.sharein.ui.home.HomeFragmentDirections
 
 
 class MeFragment : Fragment() {
@@ -34,10 +31,6 @@ class MeFragment : Fragment() {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_me, container, false)
         setHasOptionsMenu(true)
-        if (args.position != -1) {
-            viewModel.updateFetchStatus(Constants.FETCH_OTHER_USER)
-            viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, args.uid)
-        }
 
         return root
     }
@@ -59,6 +52,7 @@ class MeFragment : Fragment() {
         user.observe(viewLifecycleOwner, Observer {
             meUserName.text = user.value!!.name
             // XXX wrtie about following and on click listener to list of following
+       //     viewModel.setCurrPageUser(user.value!!)
 
             viewModel.resetFollowingList()
             viewModel.fetchFollowing(user.value!!.uid)
@@ -97,6 +91,12 @@ class MeFragment : Fragment() {
                 })
                 viewModel.fetchFollower(userUID)
             }
+            if (it.uid == viewModel.observeUser().value!!.uid) {
+                meFollowIcon.isClickable = false
+                meFollowIcon.visibility = View.INVISIBLE
+                mePrivateMessage.isClickable = false
+                mePrivateMessage.visibility = View.INVISIBLE
+            }
 
             // handle rv bind
             meRV.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -109,6 +109,11 @@ class MeFragment : Fragment() {
                 postsAdapter.addAll(it)
                 postsAdapter.notifyDataSetChanged()
             })
+            if (args.position != -1) {
+                viewModel.updateFetchStatus(Constants.FETCH_OTHER_USER)
+
+                viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, args.uid)
+            }
 
         })
 
@@ -190,6 +195,21 @@ class MeFragment : Fragment() {
                     true
                 }
                 R.id.meLiked -> {
+                    Log.d(javaClass.simpleName, "liked is clicked")
+                    viewModel.updateFetchStatus(Constants.FETCH_LIKED)
+                    viewModel.resetUserLikedPosts()
+                    viewModel.resetUserLikedPostsCount()
+                    viewModel.observeUserLikedPostsCount().observe(viewLifecycleOwner, Observer {
+                        if (it!= 0) {
+                            viewModel.fetchPosts(viewModel.observeFetchStatus().value!!, "")
+                            Log.d(javaClass.simpleName, "user liked posts size is ${it}")
+                        }
+                        else {
+                            viewModel.resetPosts()
+                        }
+                    })
+                    viewModel.fetchUserLikedPostsLikes(viewModel.observeUser().value!!.uid)
+
                     true
                 }
                 else -> super.onOptionsItemSelected(item)
@@ -200,7 +220,10 @@ class MeFragment : Fragment() {
             return when (item.itemId) {
                 R.id.meOtherBack -> {
                     findNavController().popBackStack()
-                    findNavController().popBackStack()
+          //          viewModel.popUser()
+          //          viewModel.fetchFollowing(viewModel.getCurrPageUser().uid)
+           //         viewModel.fetchFollower(viewModel.getCurrPageUser().uid)
+
                     true
                 }
                 else -> super.onOptionsItemSelected(item)

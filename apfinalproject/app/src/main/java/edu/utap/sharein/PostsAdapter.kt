@@ -13,6 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import edu.utap.sharein.model.Like
 import edu.utap.sharein.model.Post
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -21,6 +22,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
     : ListAdapter<Post, PostsAdapter.VH>(Diff()) {
 
     private var postsList = mutableListOf<Post>()
+
 
 
     class Diff: DiffUtil.ItemCallback<Post>() {
@@ -36,7 +38,6 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
                     && oldItem.text == newItem.text
                     && oldItem.pictureUUIDs == newItem.pictureUUIDs
                     && oldItem.timeStamp == newItem.timeStamp
-                    && oldItem.likes == newItem.likes
                     && oldItem.musicUUID == newItem.musicUUID
 
         }
@@ -54,6 +55,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
         private var userPhotoIVSmall: ImageView = view.findViewById(R.id.userPhotoIVSmall)
         private var userNameSmall: TextView = view.findViewById(R.id.userNameSmall)
         private var likesCount: TextView = view.findViewById(R.id.likesCount)
+        private var likeIcon: ImageView = view.findViewById(R.id.likeIcon)
         private var postRowContainer: ConstraintLayout = view.findViewById(R.id.postRowContainer)
 
 
@@ -96,7 +98,17 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
 
 
             userNameSmall.text = post.name
-            likesCount.text = post.likes.toString()
+            // XXX bind likes
+
+            viewModel.fetchOnePostLikes(post.postID, likesCount)
+            viewModel.fetchUserLikedPostsAndBind(viewModel.observeUser().value!!.uid, post, likeIcon)
+
+
+
+
+
+
+
 
         }
     }
@@ -122,6 +134,8 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
     fun clearAll() {
         postsList.clear()
     }
+
+
 
 
 

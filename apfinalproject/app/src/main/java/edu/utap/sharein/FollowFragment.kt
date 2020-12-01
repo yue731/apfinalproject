@@ -36,9 +36,9 @@ class FollowFragment: Fragment(R.layout.fragment_follow) {
         super.onViewCreated(view, savedInstanceState)
 
         followRV = view.findViewById<RecyclerView>(R.id.followRV)
-        val itemDecor = DividerItemDecoration(followRV.context, LinearLayoutManager.VERTICAL)
-        itemDecor.setDrawable(ContextCompat.getDrawable(followRV.context, (R.drawable.divider))!!)
-        followRV.addItemDecoration(itemDecor)
+//        val itemDecor = DividerItemDecoration(followRV.context, LinearLayoutManager.VERTICAL)
+//        itemDecor.setDrawable(ContextCompat.getDrawable(followRV.context, (R.drawable.divider))!!)
+//        followRV.addItemDecoration(itemDecor)
         followAdapter = FollowAdapter(viewModel, args.mode, ::viewMe)
         followRV.layoutManager = LinearLayoutManager(context)
         followRV.adapter = followAdapter
@@ -65,6 +65,7 @@ class FollowFragment: Fragment(R.layout.fragment_follow) {
 
 
         val action = FollowFragmentDirections.actionNavigationFollowToNavigationMe(position, "", uid)
+   //     viewModel.pushUser()
 
         findNavController().navigate(action)
 
