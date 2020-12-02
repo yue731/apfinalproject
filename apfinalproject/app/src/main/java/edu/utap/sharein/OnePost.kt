@@ -1,18 +1,22 @@
 package edu.utap.sharein
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.text.TextUtils
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -22,6 +26,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
     private val viewModel: MainViewModel by activityViewModels()
     private val args: OnePostArgs by navArgs()
     private var position = -1
+    private lateinit var commentAdapter: CommentAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -46,6 +51,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
         var likeIcon: ImageView = view.findViewById(R.id.onePostLikeIcon)
         var likeCount: TextView = view.findViewById(R.id.onePostLikeCount)
         var comment: ImageView = view.findViewById(R.id.onePostComment)
+        var commentsRV: RecyclerView = view.findViewById(R.id.commentsRV)
         var addFriendIV: ImageView = view.findViewById(R.id.addFriendIV)
 
 
@@ -156,12 +162,82 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
 
 
+
         // XXX bind location
 
+        // deal with comment
+        commentsRV.layoutManager = LinearLayoutManager(context)
+        commentAdapter = CommentAdapter(viewModel, ::deleteComment)
+        commentsRV.adapter = commentAdapter
+
+        viewModel.resetOnePostComments()
+
+        viewModel.observeOnePostComments().observe(viewLifecycleOwner, Observer {
+            commentAdapter.clearAll()
+            commentAdapter.addAll(it)
+            commentAdapter.notifyDataSetChanged()
+        })
+        viewModel.fetchOnePostComments(post.postID)
+
+        comment.setOnClickListener {
+            val commentPopUpView = LayoutInflater.from(requireContext()).inflate(R.layout.comment_pop_up, null)
+            val dialogueBuilderCommentPopUp = AlertDialog.Builder(requireContext())
+            dialogueBuilderCommentPopUp.setCancelable(false)
+                .setView(commentPopUpView)
+            val alertComment = dialogueBuilderCommentPopUp.create()
+            alertComment.show()
+            val submitBut = commentPopUpView.findViewById<Button>(R.id.submmitCommentBut)
+            val canncelSubmitBut = commentPopUpView.findViewById<Button>(R.id.cancelSubmitCommentBut)
+            val commentET = commentPopUpView.findViewById<EditText>(R.id.commentET)
+            commentET.requestFocus()
+
+            submitBut.setOnClickListener {
+                if (TextUtils.isEmpty(commentET.text.toString())) {
+                    Toast.makeText(activity, "Enter comment!", Toast.LENGTH_LONG).show()
+                }
+                else {
+                    viewModel.createComment(post.postID, commentET.text.toString())
+                    alertComment.cancel()
+                }
+
+            }
+            canncelSubmitBut.setOnClickListener{
+                alertComment.cancel()
+            }
+
+        }
 
 
 
 
+
+    }
+
+    private fun deleteComment(position: Int) {
+
+        if (permission(position)) {
+            val deleteCommentView = LayoutInflater.from(requireContext()).inflate(R.layout.delete_comment_alert, null)
+            val dialogBuilder = AlertDialog.Builder(requireContext())
+            dialogBuilder.setCancelable(false)
+                .setView(deleteCommentView)
+            val alert = dialogBuilder.create()
+            alert.show()
+            val deleteCommentBut = deleteCommentView.findViewById<Button>(R.id.deleteCommentBut)
+            val cancelDeleteCommentBut = deleteCommentView.findViewById<Button>(R.id.cancelDeleteCommentBut)
+            deleteCommentBut.setOnClickListener {
+                viewModel.deleteCommentAt(position)
+                alert.cancel()
+            }
+            cancelDeleteCommentBut.setOnClickListener {
+                alert.cancel()
+            }
+
+        }
+    }
+
+    private fun permission(position: Int): Boolean {
+        val comment = viewModel.getComment(position)
+        return comment.userUID == viewModel.observeUser().value!!.uid
     }
 
     override fun onResume() {

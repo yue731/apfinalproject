@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/commentET"
+        android:background="@android:color/transparent"
+        android:textSize="15sp"
+        android:hint="Enter your comment"
+        android:inputType="textCapSentences|textMultiLine"
+        android:textColorHint="#89c3c3c3"
+        android:autofillHints=""
+        android:minLines="1"
+        android:gravity="top|left"
+        android:scrollbars="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        />
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        >
+        <Button
+            android:id="@+id/submmitCommentBut"
+            android:text="Submit"
+            android:textSize="12sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/buttonBarButtonStyle"
+            android:textColor="@color/black"
+            android:gravity="center_horizontal"/>
+        <Button
+            android:id="@+id/cancelSubmitCommentBut"
+            android:text="Cancel"
+            android:textSize="12sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/buttonBarButtonStyle"
+            android:textColor="@color/black"
+            android:gravity="center_horizontal"/>
+    </TableRow>
+
+
+
+
+
+</TableLayout>

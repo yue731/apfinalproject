@@ -13,10 +13,7 @@ import androidx.lifecycle.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import edu.utap.sharein.glide.Glide
-import edu.utap.sharein.model.Follow
-import edu.utap.sharein.model.Like
-import edu.utap.sharein.model.Post
-import edu.utap.sharein.model.User
+import edu.utap.sharein.model.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -38,6 +35,8 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
     private var followingList = MutableLiveData<List<Follow>>()
     private var followerList = MutableLiveData<List<Follow>>()
+
+    private var commentsList = MutableLiveData<List<Comment>>()
 
 
 
@@ -332,9 +331,9 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
         )
         dbHelp.createPost(fetchStatus.value!!, post, postsList)
-        var longerList = postsList.value?.toMutableList()
-        longerList?.add(post)
-        postsList.value = longerList
+//        var longerList = postsList.value?.toMutableList()
+//        longerList?.add(post)
+//        postsList.value = longerList
         return post.postID
     }
 
@@ -596,6 +595,40 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
 
     }
     ////////////////////////////////////////////////////////////////////////
+
+    /*
+     Handle comment
+     */
+
+    fun observeOnePostComments(): LiveData<List<Comment>> {
+        return commentsList
+    }
+    fun resetOnePostComments() {
+        commentsList.value = listOf()
+    }
+    fun fetchOnePostComments(postID: String) {
+        dbHelp.dbFetchOnePostComments(postID, commentsList)
+    }
+    fun getComment(position: Int): Comment {
+        val comment = commentsList.value?.get(position)
+        return comment!!
+    }
+    fun createComment(postID: String, text: String) {
+        val comment = Comment (
+            userUID = currUser.value!!.uid,
+            userName = currUser.value!!.name,
+            postID = postID,
+            text = text
+
+        )
+        dbHelp.dbCreateComment(comment, commentsList)
+    }
+
+    fun deleteCommentAt(position: Int) {
+        val comment = getComment(position)
+        dbHelp.dbDeleteComment(comment, commentsList)
+    }
+
 
 
     ////////////////////////////////////////////////////////////////////////

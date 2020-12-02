@@ -7,10 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import edu.utap.sharein.glide.Glide
-import edu.utap.sharein.model.Follow
-import edu.utap.sharein.model.Like
-import edu.utap.sharein.model.Post
-import edu.utap.sharein.model.User
+import edu.utap.sharein.model.*
 
 class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -537,6 +534,53 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
             .addOnFailureListener {
                 Log.d(javaClass.simpleName, "unlike FAILED")
             }
+    }
+
+    /*
+     handle comment
+     */
+    fun dbFetchOnePostComments(postID: String, commentsList: MutableLiveData<List<Comment>>) {
+        db.collection("comment")
+            .whereEqualTo("postID", postID)
+            .orderBy("timeStamp")
+            .get()
+            .addOnSuccessListener { result ->
+                Log.d(javaClass.simpleName, "db fectch one post comments success size is ${result.documents.size}")
+                commentsList.value = result.documents.mapNotNull {
+                    it.toObject(Comment::class.java)
+                }
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "db fetch one post comments failed")
+            }
+    }
+
+    fun dbCreateComment(comment: Comment, commentsList: MutableLiveData<List<Comment>>) {
+        comment.commentID = db.collection("comment").document().id
+        db.collection("comment")
+            .document(comment.commentID)
+            .set(comment)
+            .addOnSuccessListener {
+                Log.d(javaClass.simpleName, "db create comment success")
+                dbFetchOnePostComments(comment.postID, commentsList)
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "db create comment failed")
+            }
+    }
+
+    fun dbDeleteComment(comment: Comment, commentsList: MutableLiveData<List<Comment>>) {
+        db.collection("comment")
+            .document(comment.commentID)
+            .delete()
+            .addOnSuccessListener {
+                Log.d(javaClass.simpleName, "db delete comment success")
+                dbFetchOnePostComments(comment.postID, commentsList)
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "db delete comment failed")
+            }
+
     }
 
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/commentContainer">
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/commentProfilePhotoIV"
+        app:layout_constraintStart_toStartOf="@+id/commentContainer"
+        app:layout_constraintTop_toTopOf="@+id/commentContainer"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/commentUserNameTV"
+        android:text="meow001"
+        android:textSize="15sp"
+        android:textColor="@color/grey"
+        app:layout_constraintStart_toEndOf="@+id/commentProfilePhotoIV"
+        app:layout_constraintTop_toTopOf="@id/commentProfilePhotoIV"
+        android:layout_marginLeft="5dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/commentTextTV"
+        android:text="Test"
+        android:textSize="15sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@+id/commentProfilePhotoIV"
+        app:layout_constraintStart_toStartOf="@+id/commentUserNameTV"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/commentTimeStampTV"
+        android:text="timestamp"
+        android:textSize="10sp"
+        android:textColor="@color/grey"
+        app:layout_constraintStart_toEndOf="@+id/commentTextTV"
+        app:layout_constraintBottom_toBottomOf="@+id/commentTextTV"
+        android:layout_marginLeft="5dp"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#D3D3D3"
+        app:layout_constraintTop_toBottomOf="@+id/commentTimeStampTV"
+        app:layout_constraintStart_toStartOf="@+id/commentContainer"/>
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
