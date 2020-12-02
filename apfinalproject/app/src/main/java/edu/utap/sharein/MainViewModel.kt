@@ -307,6 +307,9 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     fun resetPosts() {
         postsList.value = listOf()
     }
+    fun updatePostsList(list: List<Post>) {
+        postsList.value = list
+    }
 
     // after we successfully modify the post, we need to re-fetch the content to update livedata
     fun updatePost(position: Int, title: String, text: String, pictureUUIDs: List<String>, musicUUID: String) {

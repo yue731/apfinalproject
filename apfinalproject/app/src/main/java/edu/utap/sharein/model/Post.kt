@@ -1,5 +1,9 @@
 package edu.utap.sharein.model
 
+import android.graphics.Color
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ServerTimestamp
 

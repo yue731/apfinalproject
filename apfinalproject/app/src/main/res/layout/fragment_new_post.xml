@@ -75,37 +75,11 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tagTV"
-        android:text="Choose a tag"
-        android:textSize="15sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/photosRV"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="5dp"
-        android:text=">"
-        android:id="@+id/chooseTag"
-        android:textSize="15sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/photosRV"/>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tagTV"
-        android:background="#D3D3D3" />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/locationTV"
         android:text="Choose a location"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tagTV"
+        app:layout_constraintTop_toBottomOf="@+id/photosRV"
         app:layout_constraintBottom_toBottomOf="@+id/chooseLocation"/>
     <ImageButton
         android:layout_width="wrap_content"
@@ -114,40 +88,9 @@
         android:src="@drawable/ic_baseline_add_location_24"
         android:id="@+id/chooseLocation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tagTV"/>
+        app:layout_constraintTop_toBottomOf="@id/photosRV"/>
 
-<!--    <Button-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:id="@+id/cancelBut"-->
-<!--        android:text="Cancel"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
 
-<!--        style="?android:attr/buttonBarButtonStyle"-->
-<!--        android:textColor="@android:color/darker_gray"/>-->
-
-<!--    <Button-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:id="@+id/postBut"-->
-<!--        android:text="Post"-->
-<!--        app:layout_constraintStart_toEndOf="@id/cancelBut"-->
-<!--        app:layout_constraintEnd_toStartOf="@+id/cameraBut"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        style="?android:attr/buttonBarButtonStyle"-->
-<!--        android:textColor="@android:color/darker_gray"/>-->
-
-<!--    <Button-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:id="@+id/cameraBut"-->
-<!--        android:text="Camera"-->
-
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        style="?android:attr/buttonBarButtonStyle"-->
-<!--        android:textColor="@android:color/darker_gray"/>-->
 
 
 

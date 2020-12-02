@@ -186,7 +186,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
                 .setView(commentPopUpView)
             val alertComment = dialogueBuilderCommentPopUp.create()
             alertComment.show()
-            val submitBut = commentPopUpView.findViewById<Button>(R.id.submmitCommentBut)
+            val submitBut = commentPopUpView.findViewById<Button>(R.id.submitCommentBut)
             val canncelSubmitBut = commentPopUpView.findViewById<Button>(R.id.cancelSubmitCommentBut)
             val commentET = commentPopUpView.findViewById<EditText>(R.id.commentET)
             commentET.requestFocus()

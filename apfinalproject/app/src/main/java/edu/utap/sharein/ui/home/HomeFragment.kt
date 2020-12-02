@@ -1,10 +1,17 @@
 package edu.utap.sharein.ui.home
 
 import android.app.AlertDialog
+import android.graphics.Color
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.TextUtils
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.*
 import android.widget.Button
+import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -16,6 +23,7 @@ import edu.utap.sharein.Constants
 import edu.utap.sharein.MainViewModel
 import edu.utap.sharein.PostsAdapter
 import edu.utap.sharein.R
+import edu.utap.sharein.model.Post
 import kotlinx.android.synthetic.main.fragment_home.*
 
 class HomeFragment : Fragment() {
@@ -124,6 +132,28 @@ class HomeFragment : Fragment() {
                 true
             }
             R.id.search -> {
+                val searchPopUpView = LayoutInflater.from(requireContext()).inflate(R.layout.search_pop_up, null)
+                val dialogBuilder = AlertDialog.Builder(requireContext())
+                dialogBuilder.setCancelable(false)
+                    .setView(searchPopUpView)
+                val alert = dialogBuilder.create()
+                alert.show()
+                val searchOKBut = searchPopUpView.findViewById<Button>(R.id.searchOKBut)
+                val searchCancelBut = searchPopUpView.findViewById<Button>(R.id.searchCancelBut)
+                val searchET = searchPopUpView.findViewById<EditText>(R.id.searchET)
+                searchET.requestFocus()
+                searchOKBut.setOnClickListener {
+                    if (TextUtils.isEmpty(searchET.text.toString())) {
+                        Toast.makeText(activity, "Enter search content!", Toast.LENGTH_LONG).show()
+                    }
+                    else {
+                        performSearch(searchET.text.toString())
+                        alert.cancel()
+                    }
+                }
+                searchCancelBut.setOnClickListener {
+                    alert.cancel()
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -192,6 +222,22 @@ class HomeFragment : Fragment() {
         val currUser = viewModel.observeUser().value
         return (currUser != null && postOwner == currUser.uid)
     }
+
+    private fun performSearch(searchTerm: String) {
+        var newList = mutableListOf<Post>()
+        if (viewModel.observePosts().value != null) {
+            for (post in viewModel.observePosts().value!!) {
+                if (post.title.contains(searchTerm, ignoreCase = true) || post.text.contains(searchTerm, ignoreCase = true)) {
+                    newList.add(post)
+                }
+            }
+            viewModel.updatePostsList(newList.toList())
+        }
+
+
+    }
+
+
 
     override fun onDestroy() {
         Log.d(javaClass.simpleName, " destroy")
