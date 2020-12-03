@@ -104,19 +104,23 @@
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/musicTV"
-        app:layout_constraintBottom_toBottomOf="@+id/chooseLocation"
+        app:layout_constraintBottom_toBottomOf="@+id/currLocationTV"
         android:layout_marginLeft="5dp"
         android:layout_marginTop="10dp"/>
-    <ImageButton
+
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_baseline_add_location_24"
-        android:id="@+id/chooseLocation"
+        android:id="@+id/currLocationTV"
+        android:text=">"
+        android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/musicTV"
         android:layout_marginRight="5dp"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp"
+
+        />
+
 
 
 

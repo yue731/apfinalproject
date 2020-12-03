@@ -1,10 +1,17 @@
 package edu.utap.sharein.ui.newpost
 
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.AssetFileDescriptor
+import android.location.*
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Looper
+import android.provider.Settings
 import android.text.TextUtils
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -12,17 +19,23 @@ import android.view.*
 import android.widget.Button
 import android.widget.RadioGroup
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.google.android.gms.location.*
 import edu.utap.sharein.*
-import kotlinx.android.synthetic.main.choose_song.*
+import edu.utap.sharein.R
 import kotlinx.android.synthetic.main.fragment_new_post.*
+import java.io.IOException
+import java.lang.Exception
+import java.util.*
 
-class NewPostFragment : Fragment() {
+class NewPostFragment : Fragment(){
 
     private lateinit var newPostViewModel: NewPostViewModel
     private lateinit var imageAdapter: ImageAdapter
@@ -35,6 +48,11 @@ class NewPostFragment : Fragment() {
     private lateinit var player: MediaPlayer
     private val songReposit = SongReposit()
     private var songResources = songReposit.fetchSongs()
+
+    private val LOCATION_REQUEST_CODE = 101
+    private var address: String = ""
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
 
 
 
@@ -64,6 +82,10 @@ class NewPostFragment : Fragment() {
             // XXX update music info
 
             updateMusic()
+
+            // update location info
+            updateLocation()
+            clearLocation()
             profilePhotoUUID = viewModel.observeUser().value?.profilePhotoUUID ?: ""
         }
         else {
@@ -74,11 +96,21 @@ class NewPostFragment : Fragment() {
             enterPostET.movementMethod = ScrollingMovementMethod()
             pictureUUIDs = post.pictureUUIDs
             // XXX update music info
+            musicRawID = post.musicRawID
             if (post.musicRawID != -1) {
                 chooseMusicBut.text = songResources[post.musicRawID]?.name + " >"
             }
 
+
             updateMusic()
+            if (post.address != "") {
+                currLocationTV.text = post.address
+            }
+
+            // update location info
+            address = post.address
+            updateLocation()
+            clearLocation()
             profilePhotoUUID = viewModel.observeUser().value?.profilePhotoUUID ?: ""
 
         }
@@ -154,6 +186,7 @@ class NewPostFragment : Fragment() {
             }
             chooseMusicCancelBut.setOnClickListener {
                 musicRawID = -1
+                chooseMusicBut.text = ">"
                 stopMusic()
                 alert.cancel()
             }
@@ -191,7 +224,7 @@ class NewPostFragment : Fragment() {
                 else {
                     if (position == -1) {
                         // new post
-                        val postID = viewModel.createPost(enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicRawID)
+                        val postID = viewModel.createPost(enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicRawID, address)
                         Log.d(javaClass.simpleName, "fetch status is ${viewModel.observeFetchStatus().value} ")
                         val user = viewModel.observeUser().value
                         if (user != null) {
@@ -206,7 +239,7 @@ class NewPostFragment : Fragment() {
                     }
                     else {
                         // edit post
-                        viewModel.updatePost(position, enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicRawID)
+                        viewModel.updatePost(position, enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicRawID, address)
 
                     }
                     (activity as MainActivity?)?.hideKeyboard()
@@ -251,6 +284,126 @@ class NewPostFragment : Fragment() {
             Log.d(javaClass.simpleName, "photo added $pictureUUID len ${this.size}")
             pictureUUIDs = this
             imageAdapter.submitList(pictureUUIDs)
+        }
+    }
+
+
+    private fun grantPermission() {
+        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_REQUEST_CODE)
+        }
+    }
+
+    private fun checkLocationEnabled() {
+        var lm: LocationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        var gpsEnabled: Boolean = false
+        var networkEnabled: Boolean = false
+
+        try {
+            gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        try {
+            networkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        }
+        catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        if (!gpsEnabled && !networkEnabled) {
+            val dialogueBuilder = AlertDialog.Builder(requireContext())
+            dialogueBuilder.setCancelable(false)
+                .setTitle("Please enable GPS Service")
+                .setPositiveButton("Enable") { dialogInterface, i ->
+                    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+    }
+
+
+
+    @SuppressLint("MissingPermission")
+    private fun updateLocation() {
+        currLocationTV.setOnClickListener{
+            Log.d(javaClass.simpleName, "choose location is clicked")
+            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+            grantPermission()
+            checkLocationEnabled()
+            fusedLocationProviderClient.lastLocation.addOnCompleteListener {
+                var location: Location? = it.result
+                if (location == null) {
+                    newLocationData()
+                }
+                else {
+                    currLocationTV.text = getCityAndCountry(location.latitude, location.longitude)
+                }
+                address = currLocationTV.text.toString()
+            }
+
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun newLocationData() {
+        var locationRequest = LocationRequest()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval = 0
+        locationRequest.fastestInterval = 0
+        locationRequest.numUpdates = 1
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+        fusedLocationProviderClient!!.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
+    }
+
+    private val locationCallback = object: LocationCallback() {
+        override fun onLocationResult(p0: LocationResult?) {
+            var location: Location = p0!!.lastLocation
+            currLocationTV.text = getCityAndCountry(location.latitude, location.longitude)
+        }
+    }
+
+    private fun getCityAndCountry(lat: Double, long: Double): String {
+        var city: String = ""
+        var country: String = ""
+        var geocoder = Geocoder(requireContext(), Locale.getDefault())
+        var addressList = geocoder.getFromLocation(lat, long, 1)
+        city = addressList[0].locality
+        country = addressList[0].countryName
+
+        return city + ", " + country
+
+    }
+
+
+    private fun clearLocation() {
+        if (currLocationTV.text != ">") {
+            currLocationTV.setOnLongClickListener {
+                val clearLocationView = LayoutInflater.from(requireContext()).inflate(R.layout.clear_location_alert, null)
+                val dialogueBuilder = AlertDialog.Builder(requireContext())
+                dialogueBuilder.setCancelable(false)
+                    .setView(clearLocationView)
+                val alert = dialogueBuilder.create()
+                alert.show()
+
+                val clearLocationConfirmBut = clearLocationView.findViewById<Button>(R.id.clearLocationConfirmBut)
+                val clearLocationCancelBut = clearLocationView.findViewById<Button>(R.id.clearLocationCancelBut)
+                clearLocationConfirmBut.setOnClickListener {
+                    address = ""
+
+                    currLocationTV.text = ">"
+                    alert.cancel()
+                }
+                clearLocationCancelBut.setOnClickListener {
+                    alert.cancel()
+                }
+                true
+            }
         }
     }
 

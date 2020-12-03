@@ -38,6 +38,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
                     && oldItem.pictureUUIDs == newItem.pictureUUIDs
                     && oldItem.timeStamp == newItem.timeStamp
                     && oldItem.musicRawID == newItem.musicRawID
+                    && oldItem.address == newItem.address
 
         }
 

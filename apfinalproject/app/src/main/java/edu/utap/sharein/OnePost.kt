@@ -49,7 +49,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
         var titleTV: TextView = view.findViewById(R.id.titleTV)
         var postTV: TextView = view.findViewById(R.id.postTV)
 
-        var locationTV: TextView = view.findViewById(R.id.locationTVInPostView)
+        var addressTV: TextView = view.findViewById(R.id.addressTV)
         // XXX to write music
         var likeIcon: ImageView = view.findViewById(R.id.onePostLikeIcon)
         var likeCount: TextView = view.findViewById(R.id.onePostLikeCount)
@@ -182,6 +182,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
 
         // XXX bind location
+        addressTV.text = post.address
 
         // deal with comment
         commentsRV.layoutManager = LinearLayoutManager(context)
@@ -270,8 +271,9 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
     override fun onPause() {
         Log.d(javaClass.simpleName, "on pause")
-        if (player != null) {
-            player.release()
+        val post = viewModel.getPost(position)
+        if (post != null && post.musicRawID != -1) {
+            player.reset()
         }
         super.onPause()
     }

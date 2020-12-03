@@ -312,17 +312,18 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     }
 
     // after we successfully modify the post, we need to re-fetch the content to update livedata
-    fun updatePost(position: Int, title: String, text: String, pictureUUIDs: List<String>, musicRawID: Int) {
+    fun updatePost(position: Int, title: String, text: String, pictureUUIDs: List<String>, musicRawID: Int, address: String) {
         val post = getPost(position)
         post.title = title
         post.text = text
         post.pictureUUIDs = pictureUUIDs
         post.musicRawID = musicRawID
+        post.address = address
         dbHelp.updatePost(fetchStatus.value!!, post, postsList)
 
     }
 
-    fun createPost(title: String, text: String, pictureUUIDs: List<String>, musicRawID: Int): String {
+    fun createPost(title: String, text: String, pictureUUIDs: List<String>, musicRawID: Int, address: String): String {
         // create post and return postID
         val post = Post(
                 name = currUser.value?.name!!,
@@ -330,7 +331,8 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
                 title = title,
                 text = text,
                 pictureUUIDs = pictureUUIDs,
-                musicRawID = musicRawID
+                musicRawID = musicRawID,
+                address = address
 
         )
         dbHelp.createPost(fetchStatus.value!!, post, postsList)
