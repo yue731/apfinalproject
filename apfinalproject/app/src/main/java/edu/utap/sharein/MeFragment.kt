@@ -220,9 +220,9 @@ class MeFragment : Fragment() {
             return when (item.itemId) {
                 R.id.meOtherBack -> {
                     findNavController().popBackStack()
-          //          viewModel.popUser()
-          //          viewModel.fetchFollowing(viewModel.getCurrPageUser().uid)
-           //         viewModel.fetchFollower(viewModel.getCurrPageUser().uid)
+                    viewModel.popUser()
+                    viewModel.fetchFollowing(viewModel.getCurrPageUser().uid)
+                    viewModel.fetchFollower(viewModel.getCurrPageUser().uid)
 
                     true
                 }

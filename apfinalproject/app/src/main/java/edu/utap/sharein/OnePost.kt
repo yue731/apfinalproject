@@ -1,8 +1,10 @@
 package edu.utap.sharein
 
 import android.app.AlertDialog
+import android.content.res.AssetFileDescriptor
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.text.TextUtils
 import android.text.method.ScrollingMovementMethod
@@ -27,6 +29,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
     private val args: OnePostArgs by navArgs()
     private var position = -1
     private lateinit var commentAdapter: CommentAdapter
+    private lateinit var player: MediaPlayer
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -70,7 +73,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
                 val action = OnePostDirections.actionNavigationOnePostToNavigationMe(position, "", post.ownerUid)
                 findNavController().navigate(action)
             }
-            //viewModel.pushUser()
+            viewModel.pushUser()
         }
         userNameTV.text = post.name
 
@@ -159,6 +162,21 @@ class OnePost: Fragment(R.layout.one_post_view) {
         })
         viewModel.fetchOnePostLikes(post.postID, likeCount)
         viewModel.fetchUserLikedPostsLikes(viewModel.observeUser().value!!.uid)
+
+        // play background music
+        val musicRawID = post.musicRawID
+        if(musicRawID != -1) {
+            player = MediaPlayer.create(requireContext(), musicRawID)
+            player.start()
+            player.setOnCompletionListener {
+                it.reset()
+                val fd: AssetFileDescriptor = resources.openRawResourceFd(musicRawID)
+                it.setDataSource(fd.fileDescriptor, fd.startOffset, fd.length)
+                it.prepare()
+                it.start()
+            }
+        }
+
 
 
 
@@ -252,6 +270,9 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
     override fun onPause() {
         Log.d(javaClass.simpleName, "on pause")
+        if (player != null) {
+            player.release()
+        }
         super.onPause()
     }
 

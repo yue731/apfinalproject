@@ -13,7 +13,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import edu.utap.sharein.model.Like
 import edu.utap.sharein.model.Post
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -38,7 +37,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
                     && oldItem.text == newItem.text
                     && oldItem.pictureUUIDs == newItem.pictureUUIDs
                     && oldItem.timeStamp == newItem.timeStamp
-                    && oldItem.musicUUID == newItem.musicUUID
+                    && oldItem.musicRawID == newItem.musicRawID
 
         }
 

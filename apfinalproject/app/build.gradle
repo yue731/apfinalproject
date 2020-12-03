@@ -82,4 +82,7 @@ dependencies {
     implementation 'com.google.android.material:material:material_design_version'
     implementation 'com.github.splatte:ViewPagerIndicator:3.0.0'
 
+    // map
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+
 }

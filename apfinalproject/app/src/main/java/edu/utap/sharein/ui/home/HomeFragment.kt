@@ -83,9 +83,11 @@ class HomeFragment : Fragment() {
             postsAdapter.addAll(it)
             postsAdapter.notifyDataSetChanged()
         })
-//        viewModel.observeUser().observe(viewLifecycleOwner, Observer {
-//            viewModel.setCurrPageUser(it!!)
-//        })
+        viewModel.observeUser().observe(viewLifecycleOwner, Observer {
+            if (it != null) {
+                viewModel.setCurrPageUser(it)
+            }
+        })
 
 
 
