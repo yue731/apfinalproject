@@ -132,6 +132,11 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     fun getCurrPageUser(): User {
         return currPageUser.value!!
     }
+    fun observeUserStack(): LiveData<Stack<User>> {
+        return userStack
+    }
+
+
 
     fun like(postID: String) {
         val like = Like (

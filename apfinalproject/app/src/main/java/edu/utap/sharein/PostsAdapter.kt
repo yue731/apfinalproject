@@ -103,13 +103,6 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
             viewModel.fetchOnePostLikes(post.postID, likesCount)
             viewModel.fetchUserLikedPostsAndBind(viewModel.observeUser().value!!.uid, post, likeIcon)
 
-
-
-
-
-
-
-
         }
     }
 

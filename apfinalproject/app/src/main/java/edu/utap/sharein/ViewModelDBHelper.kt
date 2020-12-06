@@ -46,19 +46,28 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
     }
 
     fun dbFetchPostsFollow(followings: List<String>, postsList: MutableLiveData<List<Post>>) {
-        db.collection("allPosts")
-            .orderBy("timeStamp", Query.Direction.DESCENDING)
-            .whereIn("ownerUid", followings)
-            .limit(100)
-            .get()
-            .addOnSuccessListener {result ->
-                postsList.value = result.documents.mapNotNull {
-                    it.toObject(Post::class.java)
-                }
-            }
-            .addOnFailureListener {
 
-            }
+        var temp = mutableListOf<Post>()
+        for (i in followings.indices) {
+            db.collection("allPosts")
+                .orderBy("timeStamp", Query.Direction.DESCENDING)
+                .whereEqualTo("ownerUid", followings[i])
+                .limit(100)
+                .get()
+                .addOnSuccessListener {result ->
+
+                    temp.addAll(result.documents.mapNotNull {
+                        it.toObject(Post::class.java)
+                    })
+                    if (i == followings.size - 1) {
+                        postsList.value = temp
+                    }
+                }
+                .addOnFailureListener {
+
+                }
+        }
+
     }
 
     fun dbFetchPostsUser(uid: String, postsList: MutableLiveData<List<Post>>) {
@@ -369,44 +378,58 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                         postIDList.add(post.postID)
                     }
                     var likesCountList = mutableListOf<Int>()
+                    var tempLists = postIDList.chunked(10)
+                    var entryCount = 0
                     db.collection("like")
-                        .whereIn("postID", postIDList)
                         .get()
-                        .addOnSuccessListener { result ->
-                            var likes = MutableLiveData<List<Like>>()
-                            likes.value = result.documents.mapNotNull {
-                                it.toObject(Like::class.java)
-                            }
-                            if (likes.value!!.size != 0) {
-                                for (pid in postIDList) {
-                                    var count = 0
-                                    for (l in likes.value!!) {
-                                        if (l.postID == pid) {
-                                            count++
+                        .addOnSuccessListener { like ->
+                            entryCount = like.documents.size
+                            var likes = mutableListOf<Like>()
+                            for (list in tempLists) {
+                                db.collection("like")
+                                    .whereIn("postID", list)
+                                    .get()
+                                    .addOnSuccessListener {result ->
+                                        var temp = MutableLiveData<List<Like>>()
+                                        temp.value = result.documents.mapNotNull {
+                                            it.toObject(Like::class.java)
                                         }
+                                        likes.addAll(temp.value!!)
+
+
+                                        if (likes!!.size != 0 && likes!!.size == entryCount) {
+                                            for (pid in postIDList) {
+                                                var count = 0
+                                                for (l in likes!!) {
+                                                    if (l.postID == pid) {
+                                                        count++
+                                                    }
+                                                }
+                                                likesCountList.add(count)
+                                            }
+
+                                            var pairList = mutableListOf<Pair<Post, Int>>()
+                                            for (i in 0 until postIDList.size) {
+                                                pairList.add(Pair(postsList.value!![i], likesCountList[i]))
+                                            }
+                                            pairList.sortBy {
+                                                it.second
+                                            }
+                                            pairList.reverse()
+                                            var sortedPostList = mutableListOf<Post>()
+                                            for (pair in pairList) {
+                                                sortedPostList.add(pair.first)
+                                            }
+                                            postsList.value = sortedPostList
+                                        }
+
                                     }
-                                    likesCountList.add(count)
-                                }
+                                    .addOnFailureListener {
 
-                                var pairList = mutableListOf<Pair<Post, Int>>()
-                                for (i in 0 until postIDList.size) {
-                                    pairList.add(Pair(postsList.value!![i], likesCountList[i]))
-                                }
-                                pairList.sortBy {
-                                    it.second
-                                }
-                                pairList.reverse()
-                                var sortedPostList = mutableListOf<Post>()
-                                for (pair in pairList) {
-                                    sortedPostList.add(pair.first)
-                                }
-                                postsList.value = sortedPostList
+                                    }
                             }
-
                         }
-                        .addOnFailureListener{
 
-                        }
 
 
                 }
@@ -452,6 +475,7 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
             }
     }
     fun dbFetchUserLikedPosts(userUID: String, likes: MutableLiveData<List<Like>>, postsList: MutableLiveData<List<Post>>) {
+
         db.collection("like")
             .whereEqualTo("userUID", userUID)
             .get()
@@ -465,17 +489,24 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
                     for (l in likes.value!!) {
                         list.add(l.postID)
                     }
-                    db.collection("allPosts")
-                        .whereIn("postID", list)
-                        .get()
-                        .addOnSuccessListener { result ->
-                            postsList.value = result.documents.mapNotNull {
-                                it.toObject(Post::class.java)
+                    var temp = mutableListOf<Post>()
+                    for (i in list.indices) {
+                        db.collection("allPosts")
+                            .whereEqualTo("postID", list[i])
+                            .get()
+                            .addOnSuccessListener { result ->
+                               temp.addAll(result.documents.mapNotNull {
+                                   it.toObject(Post::class.java)
+                               })
+                                if (i == list.size - 1) {
+                                    postsList.value = temp
+                                }
                             }
-                        }
-                        .addOnFailureListener {
+                            .addOnFailureListener {
 
-                        }
+                            }
+                    }
+
                 }
 
 

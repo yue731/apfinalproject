@@ -65,7 +65,7 @@ class FollowFragment: Fragment(R.layout.fragment_follow) {
 
 
         val action = FollowFragmentDirections.actionNavigationFollowToNavigationMe(position, "", uid)
-   //     viewModel.pushUser()
+        viewModel.pushUser()
 
         findNavController().navigate(action)
 

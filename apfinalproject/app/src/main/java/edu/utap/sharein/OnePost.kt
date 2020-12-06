@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import edu.utap.sharein.model.Post
 
 class OnePost: Fragment(R.layout.one_post_view) {
 
@@ -30,6 +31,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
     private var position = -1
     private lateinit var commentAdapter: CommentAdapter
     private lateinit var player: MediaPlayer
+    private var post: Post? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -59,26 +61,27 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
 
 
-
-        position = args.position
-        val post = viewModel.getPost(position)
+        if (post == null) {
+            position = args.position
+            post = viewModel.getPost(position)
+        }
         //  to bind profile photo
-        viewModel.fetchOwner(profilePhotoIV, post.ownerUid) // fetch post owner and bind profile photo to image view
+        viewModel.fetchOwner(profilePhotoIV, post!!.ownerUid) // fetch post owner and bind profile photo to image view
         profilePhotoIV.setOnClickListener {
-            if (post.ownerUid == viewModel.observeUser().value!!.uid) {
-                val action = OnePostDirections.actionNavigationOnePostToNavigationMe(-1, "Me", viewModel.observeUser().value!!.uid)
-                findNavController().navigate(action)
-            }
-            else {
-                val action = OnePostDirections.actionNavigationOnePostToNavigationMe(position, "", post.ownerUid)
-                findNavController().navigate(action)
-            }
+//            if (post!!.ownerUid == viewModel.observeUser().value!!.uid) {
+//                val action = OnePostDirections.actionNavigationOnePostToNavigationMe(-1, "Me", viewModel.observeUser().value!!.uid)
+//                findNavController().navigate(action)
+//            }
+
+            val action = OnePostDirections.actionNavigationOnePostToNavigationMe(position, "", post!!.ownerUid)
+            findNavController().navigate(action)
+
             viewModel.pushUser()
         }
-        userNameTV.text = post.name
+        userNameTV.text = post!!.name
 
         //  bind photos swipe
-        val imageSiderRVAdapter = ImageSliderRVAdapter(viewModel, post)
+        val imageSiderRVAdapter = ImageSliderRVAdapter(viewModel, post!!)
         photoVP.adapter = imageSiderRVAdapter
 
         val indicator = view.findViewById<TabLayout>(R.id.indicator)
@@ -89,13 +92,13 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
 
 
-        titleTV.text = post.title
-        postTV.text = post.text
+        titleTV.text = post!!.title
+        postTV.text = post!!.text
         postTV.movementMethod = ScrollingMovementMethod()
 
         // handle follow
         val meUID = viewModel.observeUser().value!!.uid
-        val postOwnerUID = post.ownerUid
+        val postOwnerUID = post!!.ownerUid
 
 
         if (meUID == postOwnerUID) {
@@ -133,16 +136,16 @@ class OnePost: Fragment(R.layout.one_post_view) {
         viewModel.resetUserLikedPosts()
         viewModel.observeOnePostLikes().observe(viewLifecycleOwner, Observer { onePostLikes ->
             viewModel.observeUserLikedPosts().observe(viewLifecycleOwner, Observer { userLikedPosts ->
-                var isLiked = viewModel.isLiked(post.postID)
+                var isLiked = viewModel.isLiked(post!!.postID)
                 Log.d(javaClass.simpleName, "this post is liked ${isLiked}")
                 if (isLiked) {
                     likeIcon.setImageResource(R.drawable.ic_baseline_favorite_24)
                     likeIcon.setOnClickListener {
                         Log.d(javaClass.simpleName, "post is unliked")
 //                        likeIcon.setImageResource(R.drawable.ic_baseline_favorite_border_24)
-                        viewModel.unlike(post.postID)
+                        viewModel.unlike(post!!.postID)
                         likeCount.text = (onePostLikes.size - 1).toString()
-                        viewModel.fetchOnePostLikes(post.postID, likeCount)
+                        viewModel.fetchOnePostLikes(post!!.postID, likeCount)
                         viewModel.fetchUserLikedPostsLikes(viewModel.observeUser().value!!.uid)
                     }
                 }
@@ -151,20 +154,20 @@ class OnePost: Fragment(R.layout.one_post_view) {
                     likeIcon.setOnClickListener {
                         Log.d(javaClass.simpleName, "post is liked")
 //                        likeIcon.setImageResource(R.drawable.ic_baseline_favorite_24)
-                        viewModel.like(post.postID)
+                        viewModel.like(post!!.postID)
                         likeCount.text = (onePostLikes.size + 1).toString()
-                        viewModel.fetchOnePostLikes(post.postID, likeCount)
+                        viewModel.fetchOnePostLikes(post!!.postID, likeCount)
                         viewModel.fetchUserLikedPostsLikes(viewModel.observeUser().value!!.uid)
                     }
                 }
             })
 
         })
-        viewModel.fetchOnePostLikes(post.postID, likeCount)
+        viewModel.fetchOnePostLikes(post!!.postID, likeCount)
         viewModel.fetchUserLikedPostsLikes(viewModel.observeUser().value!!.uid)
 
         // play background music
-        val musicRawID = post.musicRawID
+        val musicRawID = post!!.musicRawID
         if(musicRawID != -1) {
             player = MediaPlayer.create(requireContext(), musicRawID)
             player.start()
@@ -182,7 +185,13 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
 
         // XXX bind location
-        addressTV.text = post.address
+        if (post!!.address == ">") {
+            addressTV.text = ""
+        }
+        else {
+            addressTV.text = post!!.address
+        }
+
 
         // deal with comment
         commentsRV.layoutManager = LinearLayoutManager(context)
@@ -196,7 +205,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
             commentAdapter.addAll(it)
             commentAdapter.notifyDataSetChanged()
         })
-        viewModel.fetchOnePostComments(post.postID)
+        viewModel.fetchOnePostComments(post!!.postID)
 
         comment.setOnClickListener {
             val commentPopUpView = LayoutInflater.from(requireContext()).inflate(R.layout.comment_pop_up, null)
@@ -215,7 +224,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
                     Toast.makeText(activity, "Enter comment!", Toast.LENGTH_LONG).show()
                 }
                 else {
-                    viewModel.createComment(post.postID, commentET.text.toString())
+                    viewModel.createComment(post!!.postID, commentET.text.toString())
                     alertComment.cancel()
                 }
 
@@ -271,8 +280,7 @@ class OnePost: Fragment(R.layout.one_post_view) {
 
     override fun onPause() {
         Log.d(javaClass.simpleName, "on pause")
-        val post = viewModel.getPost(position)
-        if (post != null && post.musicRawID != -1) {
+        if (post!!.musicRawID != -1) {
             player.reset()
         }
         super.onPause()

@@ -52,7 +52,7 @@ class MeFragment : Fragment() {
         user.observe(viewLifecycleOwner, Observer {
             meUserName.text = user.value!!.name
             // XXX wrtie about following and on click listener to list of following
-       //     viewModel.setCurrPageUser(user.value!!)
+            viewModel.setCurrPageUser(user.value!!)
 
             viewModel.resetFollowingList()
             viewModel.fetchFollowing(user.value!!.uid)
@@ -227,7 +227,9 @@ class MeFragment : Fragment() {
             return when (item.itemId) {
                 R.id.meOtherBack -> {
                     findNavController().popBackStack()
+
                     viewModel.popUser()
+                    Log.d(javaClass.simpleName, "curr user is ${viewModel.getCurrPageUser().name}")
                     viewModel.fetchFollowing(viewModel.getCurrPageUser().uid)
                     viewModel.fetchFollower(viewModel.getCurrPageUser().uid)
 
