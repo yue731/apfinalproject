@@ -123,6 +123,11 @@
             app:destination="@+id/navigation_follow"
             app:enterAnim="@anim/nav_default_enter_anim"
             app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/action_navigation_me_to_navigation_message"
+            app:destination="@+id/navigation_message"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
         <argument
             android:name="position"
             app:argType="integer"
@@ -154,6 +159,45 @@
             android:name="mode"
             app:argType="integer"
             android:defaultValue="-1"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_message"
+        android:name="edu.utap.sharein.MessageFragment"
+        android:label="Message"
+        tools:layout="@layout/fragment_message">
+        <action
+            android:id="@+id/action_navigation_message_to_navigation_me"
+            app:destination="@+id/navigation_me"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+        <action
+            android:id="@+id/ation_navigation_message_to_navigation_message_preview"
+            app:destination="@+id/navigation_message_preview"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
+        <argument
+            android:name="receiverUID"
+            app:argType="string"
+            android:defaultValue=""/>
+        <argument
+            android:name="position"
+            app:argType="integer"
+            android:defaultValue="-1"/>
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_message_preview"
+        android:name="edu.utap.sharein.ui.messagepreview.MessagePreviewFragment"
+        android:label="Message Inbox"
+        tools:layout="@layout/fragment_message_preview">
+        <action
+            android:id="@+id/action_navigation_message_preview_to_navigation_message"
+            app:destination="@+id/navigation_message"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim" />
 
     </fragment>
 

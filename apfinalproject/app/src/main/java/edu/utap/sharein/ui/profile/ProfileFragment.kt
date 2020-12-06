@@ -1,7 +1,6 @@
 package edu.utap.sharein.ui.profile
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.Drawable
@@ -15,7 +14,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -40,7 +38,7 @@ class ProfileFragment : Fragment() {
         const val rcCropPhoto = 47
     }
 
-    private lateinit var notificationsViewModel: ProfileViewModel
+    private lateinit var profileViewModel: ProfileViewModel
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var userProfilePhoto: ImageView
 
@@ -49,7 +47,7 @@ class ProfileFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        notificationsViewModel =
+        profileViewModel =
                 ViewModelProvider(this).get(ProfileViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_profile, container, false)
 //        val textView: TextView = root.findViewById(R.id.text_notifications)

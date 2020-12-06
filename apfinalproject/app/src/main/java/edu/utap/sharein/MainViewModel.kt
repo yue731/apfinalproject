@@ -65,6 +65,12 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
     private var userLikedPosts = MutableLiveData<List<Like>>()
     private var userLikedPostsCount = MutableLiveData<Int>()
 
+    private var messagesSentByMeList = MutableLiveData<List<Message>>()
+    private var messagesReceivedByMeList = MutableLiveData<List<Message>>()
+    private var allMessagesList = MutableLiveData<List<Message>>()
+    private var lastMessageReceivedList = MutableLiveData<List<Message>>()
+    private var messagesReceivedListPreview = MutableLiveData<List<Message>>()
+
 
     ////////////////////////////////////////////////////////////////////////
     /*
@@ -633,6 +639,79 @@ class MainViewModel(application: Application, private val state: SavedStateHandl
         val comment = getComment(position)
         dbHelp.dbDeleteComment(comment, commentsList)
     }
+
+    /*
+     Deal with messages
+     */
+
+    fun observeSentMessages(): LiveData<List<Message>> {
+        return messagesSentByMeList
+    }
+    fun observeReceivedMessages(): LiveData<List<Message>> {
+        return messagesReceivedByMeList
+    }
+
+    fun observeAllMessages(): LiveData<List<Message>> {
+        return allMessagesList
+    }
+
+    fun observeLastMessagesReceivedList(): LiveData<List<Message>> {
+        return lastMessageReceivedList
+    }
+
+
+
+    fun resetSentMessages() {
+        messagesSentByMeList.value = listOf()
+    }
+    fun resetReceivedMessages() {
+        messagesReceivedByMeList.value = listOf()
+    }
+    fun resetAllMessages() {
+        allMessagesList.value = listOf()
+    }
+
+    fun resetLastMessagesReceivedList() {
+        lastMessageReceivedList.value = listOf()
+    }
+    fun resetMessagesReceivedListPreview() {
+        messagesReceivedListPreview.value = listOf()
+    }
+
+    fun sortAllMessages() {
+        var temp = allMessagesList.value
+        temp?.sortedBy {
+            it.timeStamp
+        }
+        allMessagesList.value = temp
+    }
+
+
+    fun fetchSentMessages(receiverUID: String) {
+        dbHelp.dbFetchMessageBySenderReceiver(currUser.value!!.uid, receiverUID, messagesSentByMeList, allMessagesList)
+       // sortAllMessages()
+    }
+    fun fetchReceivedMessages(senderUID: String) {
+        dbHelp.dbFetchMessageBySenderReceiver(senderUID, currUser.value!!.uid, messagesReceivedByMeList, allMessagesList)
+      //  sortAllMessages()
+    }
+
+    fun fetchLastReceivedMessages() {
+        dbHelp.dbFetchLastMessageReceived(currUser.value!!.uid, messagesReceivedListPreview, lastMessageReceivedList)
+    }
+
+    fun createMessage(receiverUID: String, receiverName: String, messageText: String) {
+        val message = Message(
+            senderUID = currUser.value!!.uid,
+            senderName = currUser.value!!.name,
+            receiverUID = receiverUID,
+            receiverName = receiverName,
+            messageText = messageText
+        )
+        dbHelp.dbCreateMessage(message, messagesSentByMeList, allMessagesList)
+    }
+
+
 
 
 

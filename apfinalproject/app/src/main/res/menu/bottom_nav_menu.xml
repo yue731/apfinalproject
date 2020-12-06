@@ -12,6 +12,12 @@
         android:title="@string/title_newPost" />
 
     <item
+        android:id="@+id/navigation_message_preview"
+        android:icon="@drawable/ic_baseline_email_24"
+        android:title="Message"/>
+
+
+    <item
         android:id="@+id/navigation_me"
         android:icon="@drawable/ic_baseline_person_24"
         android:title="@string/title_me" />

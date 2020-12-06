@@ -583,4 +583,99 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
 
     }
 
+    /*
+     Deal with messages
+     */
+
+    fun dbFetchMessageBySenderReceiver(senderUID: String, receiverUID: String, messagesList: MutableLiveData<List<Message>>, allMessagesList: MutableLiveData<List<Message>>) {
+        db.collection("message")
+            .whereEqualTo("senderUID", senderUID)
+            .whereEqualTo("receiverUID", receiverUID)
+            .orderBy("timeStamp")
+            .get()
+            .addOnSuccessListener { result ->
+                Log.d(javaClass.simpleName, "db fetch messages success")
+                messagesList.value = result.documents.mapNotNull {
+                    it.toObject(Message::class.java)
+                }
+                var temp = mutableListOf<Message>()
+                if (allMessagesList.value != null) {
+                    temp.addAll(allMessagesList.value!!)
+                }
+
+                if (messagesList.value != null) {
+                    for (m in messagesList.value!!) {
+                        if (!temp.contains(m)) {
+                            temp.add(m)
+                        }
+                    }
+                }/*
+                temp.sortedBy {
+                    it.timeStamp
+                }*/
+                allMessagesList.value = temp
+                Log.d(javaClass.simpleName, "allMessagesList size is ${allMessagesList.value?.size}")
+
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "db fetch messages failed", it)
+            }
+    }
+
+    fun dbFetchLastMessageReceived(receiverUID: String, messageReceived: MutableLiveData<List<Message>>, lastMessageReceivedList: MutableLiveData<List<Message>>) {
+        db.collection("message")
+
+            .whereEqualTo("receiverUID", receiverUID)
+            .orderBy("timeStamp", Query.Direction.DESCENDING)
+
+            .get()
+            .addOnSuccessListener {result ->
+                Log.d(javaClass.simpleName, "db fetch last message success")
+                messageReceived.value = result.documents.mapNotNull {
+                    it.toObject(Message::class.java)
+                }
+                var temp = mutableListOf<Message>()
+                if (messageReceived.value != null) {
+                    for (m in messageReceived.value!!) {
+                        var add = true
+                        for (mm in temp) {
+                            if (mm.senderName == m.senderName) {
+                                add = false
+                            }
+                        }
+                        if (add) {
+                            temp.add(m)
+                        }
+                    }
+                }
+                lastMessageReceivedList.value = temp
+                Log.d(javaClass.simpleName, "lastMessageReceivedList size is ${lastMessageReceivedList.value?.size}")
+
+
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "fetch last message failed")
+            }
+    }
+
+    fun dbCreateMessage(message: Message, messagesList: MutableLiveData<List<Message>>, allMessagesList: MutableLiveData<List<Message>>) {
+        message.messageID = db.collection("message").document().id
+        db.collection("message")
+            .document(message.messageID)
+            .set(message)
+            .addOnSuccessListener {
+                Log.d(javaClass.simpleName, "db create message success")
+                dbFetchMessageBySenderReceiver(message.senderUID, message.receiverUID, messagesList, allMessagesList)
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "db create message failed")
+            }
+    }
+
+
+
+
+
+
+
 }

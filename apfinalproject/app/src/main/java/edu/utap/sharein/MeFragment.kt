@@ -97,6 +97,12 @@ class MeFragment : Fragment() {
                 mePrivateMessage.isClickable = false
                 mePrivateMessage.visibility = View.INVISIBLE
             }
+            else {
+                mePrivateMessage.setOnClickListener {
+                    val action = MeFragmentDirections.actionNavigationMeToNavigationMessage(user.value!!.uid, -1)
+                    findNavController().navigate(action)
+                }
+            }
 
             // handle rv bind
             meRV.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -169,6 +175,7 @@ class MeFragment : Fragment() {
 
             meToProfileBut.isClickable = false
             meToProfileBut.visibility = View.INVISIBLE
+
 
         }
 
