@@ -77,15 +77,24 @@ class HomeFragment : Fragment() {
         postsRV.adapter = postsAdapter
 
         viewModel.observePosts().observe(viewLifecycleOwner, Observer {
-            toggleEmptyPosts()
-            postsAdapter.clearAll()
+            if(viewModel.observeUser().value != null) {
+                toggleEmptyPosts()
+                postsAdapter.clearAll()
 
-            postsAdapter.addAll(it)
-            postsAdapter.notifyDataSetChanged()
+                postsAdapter.addAll(it)
+                postsAdapter.notifyDataSetChanged()
+            }
         })
         viewModel.observeUser().observe(viewLifecycleOwner, Observer {
             if (it != null) {
                 viewModel.setCurrPageUser(it)
+                if (viewModel.observePosts().value != null) {
+                    toggleEmptyPosts()
+                    postsAdapter.clearAll()
+
+                    postsAdapter.addAll(viewModel.observePosts().value!!)
+                    postsAdapter.notifyDataSetChanged()
+                }
             }
         })
 

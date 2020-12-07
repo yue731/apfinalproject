@@ -167,31 +167,68 @@ class ViewModelDBHelper(postsList: MutableLiveData<List<Post>>) {
      After deleting the post, need to re-fetch the contents
      */
     fun removePost(fetchStatus: Int, post: Post, postsList: MutableLiveData<List<Post>>) {
-        db.collection("allPosts").document(post.postID).delete()
-                .addOnSuccessListener {
-                    Log.d(javaClass.simpleName, "Post delete success \"${ellipsizeString(post.text)}\" id ${post.postID}")
-                    when(fetchStatus) {
-                        Constants.FETCH_FOLLOW -> {
+        var commentsList = mutableListOf<Comment>()
+        var likesList = mutableListOf<Like>()
+        db.collection("comment")
+            .whereEqualTo("postID", post.postID)
+            .get()
+            .addOnSuccessListener {result ->
+                commentsList.addAll(result.documents.mapNotNull {
+                    it.toObject(Comment::class.java)
+                })
+                if (commentsList.size != 0) {
+                    for (i in commentsList.indices) {
+                        db.collection("comment").document(commentsList[i].commentID).delete()
 
-                        }
-                        Constants.FETCH_ALL -> {
-                            dbFetchPostsAll(postsList)
-                        }
-                        Constants.FETCH_TREND -> {
-                            dbFetchTrend(postsList)
-                        }
-                        Constants.FETCH_CURR_USER_POSTS -> {
-                            dbFetchPostsUser(post.ownerUid, postsList)
-                        }
-                        Constants.FETCH_LIKED -> {
-
-                        }
                     }
                 }
-                .addOnFailureListener {
-                    Log.d(javaClass.simpleName, "Post delete FAILED \"${ellipsizeString(post.text)}\" id ${post.postID}")
-                    Log.w(javaClass.simpleName, "Error ", it)
+            }
+            .addOnFailureListener {
+
+            }
+        db.collection("like")
+            .whereEqualTo("postID", post.postID)
+            .get()
+            .addOnSuccessListener {result ->
+                likesList.addAll(result.documents.mapNotNull {
+                    it.toObject(Like::class.java)
+                })
+                if (likesList.size != 0) {
+                    for (i in likesList.indices) {
+                        db.collection("like").document(likesList[i].likeID).delete()
+
+                    }
                 }
+            }
+            .addOnFailureListener {
+
+            }
+        db.collection("allPosts").document(post.postID).delete()
+            .addOnSuccessListener {
+                Log.d(javaClass.simpleName, "Post delete success \"${ellipsizeString(post.text)}\" id ${post.postID}")
+                when(fetchStatus) {
+                    Constants.FETCH_FOLLOW -> {
+
+                    }
+                    Constants.FETCH_ALL -> {
+                        dbFetchPostsAll(postsList)
+                    }
+                    Constants.FETCH_TREND -> {
+                        dbFetchTrend(postsList)
+                    }
+                    Constants.FETCH_CURR_USER_POSTS -> {
+                        dbFetchPostsUser(post.ownerUid, postsList)
+                    }
+                    Constants.FETCH_LIKED -> {
+
+                    }
+                }
+            }
+            .addOnFailureListener {
+                Log.d(javaClass.simpleName, "Post delete FAILED \"${ellipsizeString(post.text)}\" id ${post.postID}")
+                Log.w(javaClass.simpleName, "Error ", it)
+            }
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////

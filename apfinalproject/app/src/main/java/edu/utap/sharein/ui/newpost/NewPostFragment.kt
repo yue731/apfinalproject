@@ -35,7 +35,7 @@ import java.io.IOException
 import java.lang.Exception
 import java.util.*
 
-class NewPostFragment : Fragment(){
+class NewPostFragment : Fragment() {
 
     private lateinit var newPostViewModel: NewPostViewModel
     private lateinit var imageAdapter: ImageAdapter
@@ -54,15 +54,13 @@ class NewPostFragment : Fragment(){
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
 
-
-
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         newPostViewModel =
-                ViewModelProvider(this).get(NewPostViewModel::class.java)
+            ViewModelProvider(this).get(NewPostViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_new_post, container, false)
 //        val textView: TextView = root.findViewById(R.id.text_dashboard)
 //        dashboardViewModel.text.observe(viewLifecycleOwner, Observer {
@@ -85,10 +83,10 @@ class NewPostFragment : Fragment(){
 
             // update location info
             updateLocation()
+            Log.d(javaClass.simpleName, "curr location TV is ${currLocationTV.text}")
             clearLocation()
             profilePhotoUUID = viewModel.observeUser().value?.profilePhotoUUID ?: ""
-        }
-        else {
+        } else {
             // edit post
             val post = viewModel.getPost(position)
             enterTitleET.text.insert(0, post.title)
@@ -110,6 +108,7 @@ class NewPostFragment : Fragment(){
             // update location info
             address = post.address
             updateLocation()
+            Log.d(javaClass.simpleName, "curr location TV is ${currLocationTV.text}")
             clearLocation()
             profilePhotoUUID = viewModel.observeUser().value?.profilePhotoUUID ?: ""
 
@@ -130,15 +129,14 @@ class NewPostFragment : Fragment(){
         imageAdapter.submitList(pictureUUIDs)
 
 
-
-
     }
 
-    private fun updateMusic(){
+    private fun updateMusic() {
 
         chooseMusicBut.setOnClickListener {
 
-            val chooseMusicView = LayoutInflater.from(requireContext()).inflate(R.layout.choose_song, null)
+            val chooseMusicView =
+                LayoutInflater.from(requireContext()).inflate(R.layout.choose_song, null)
             val dialogueBuilder = AlertDialog.Builder(requireContext())
             dialogueBuilder.setCancelable(false)
                 .setView(chooseMusicView)
@@ -166,7 +164,7 @@ class NewPostFragment : Fragment(){
                     }
                     else -> -1
                 }
-                if (musicRawID != -1 ) {
+                if (musicRawID != -1) {
 
                     stopMusic()
 
@@ -178,7 +176,8 @@ class NewPostFragment : Fragment(){
 
 
             val chooseMusicOKBut = chooseMusicView.findViewById<Button>(R.id.chooseMusicOKBut)
-            val chooseMusicCancelBut = chooseMusicView.findViewById<Button>(R.id.chooseMusicCancelBut)
+            val chooseMusicCancelBut =
+                chooseMusicView.findViewById<Button>(R.id.chooseMusicCancelBut)
             chooseMusicOKBut.setOnClickListener {
                 stopMusic()
                 alert.cancel()
@@ -220,12 +219,20 @@ class NewPostFragment : Fragment(){
                 // XXX post it
                 if (TextUtils.isEmpty(enterTitleET.text.toString())) {
                     Toast.makeText(activity, "Enter title!", Toast.LENGTH_LONG).show()
-                }
-                else {
+                } else {
                     if (position == -1) {
                         // new post
-                        val postID = viewModel.createPost(enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicRawID, address)
-                        Log.d(javaClass.simpleName, "fetch status is ${viewModel.observeFetchStatus().value} ")
+                        val postID = viewModel.createPost(
+                            enterTitleET.text.toString(),
+                            enterPostET.text.toString(),
+                            pictureUUIDs,
+                            musicRawID,
+                            address
+                        )
+                        Log.d(
+                            javaClass.simpleName,
+                            "fetch status is ${viewModel.observeFetchStatus().value} "
+                        )
                         val user = viewModel.observeUser().value
                         if (user != null) {
                             Log.d(javaClass.simpleName, "when post, user is not null")
@@ -236,20 +243,31 @@ class NewPostFragment : Fragment(){
                             viewModel.updateUser(user)
                         }
 
-                    }
-                    else {
+                    } else {
                         // edit post
-                        viewModel.updatePost(position, enterTitleET.text.toString(), enterPostET.text.toString(), pictureUUIDs, musicRawID, address)
+                        viewModel.updatePost(
+                            position,
+                            enterTitleET.text.toString(),
+                            enterPostET.text.toString(),
+                            pictureUUIDs,
+                            musicRawID,
+                            address
+                        )
 
                     }
                     (activity as MainActivity?)?.hideKeyboard()
                     val status = viewModel.observeFetchStatus().value
                     if (status == Constants.FETCH_FOLLOW || status == Constants.FETCH_ALL || status == Constants.FETCH_TREND) {
-                        val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationHome()
+                        val action =
+                            NewPostFragmentDirections.actionNavigationNewPostToNavigationHome()
                         findNavController().navigate(action)
-                    }
-                    else {
-                        val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationMe(-1, "Me", viewModel.observeUser().value!!.uid)
+                    } else {
+                        val action =
+                            NewPostFragmentDirections.actionNavigationNewPostToNavigationMe(
+                                -1,
+                                "Me",
+                                viewModel.observeUser().value!!.uid
+                            )
                         findNavController().navigate(action)
                     }
                 }
@@ -267,9 +285,12 @@ class NewPostFragment : Fragment(){
                 if (status == Constants.FETCH_FOLLOW || status == Constants.FETCH_ALL || status == Constants.FETCH_TREND) {
                     val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationHome()
                     findNavController().navigate(action)
-                }
-                else {
-                    val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationMe(-1, "Me", viewModel.observeUser().value!!.uid)
+                } else {
+                    val action = NewPostFragmentDirections.actionNavigationNewPostToNavigationMe(
+                        -1,
+                        "Me",
+                        viewModel.observeUser().value!!.uid
+                    )
                     findNavController().navigate(action)
                 }
                 true
@@ -289,28 +310,41 @@ class NewPostFragment : Fragment(){
 
 
     private fun grantPermission() {
-        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            && ActivityCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION), LOCATION_REQUEST_CODE)
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+            && ActivityCompat.checkSelfPermission(
+                requireContext(),
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                LOCATION_REQUEST_CODE
+            )
         }
     }
 
     private fun checkLocationEnabled() {
-        var lm: LocationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        var lm: LocationManager =
+            requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
         var gpsEnabled: Boolean = false
         var networkEnabled: Boolean = false
 
         try {
             gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
         try {
             networkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
@@ -328,20 +362,19 @@ class NewPostFragment : Fragment(){
     }
 
 
-
     @SuppressLint("MissingPermission")
     private fun updateLocation() {
-        currLocationTV.setOnClickListener{
+        currLocationTV.setOnClickListener {
             Log.d(javaClass.simpleName, "choose location is clicked")
-            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
+            fusedLocationProviderClient =
+                LocationServices.getFusedLocationProviderClient(requireContext())
             grantPermission()
             checkLocationEnabled()
             fusedLocationProviderClient.lastLocation.addOnCompleteListener {
                 var location: Location? = it.result
                 if (location == null) {
                     newLocationData()
-                }
-                else {
+                } else {
                     currLocationTV.text = getCityAndCountry(location.latitude, location.longitude)
                 }
                 address = currLocationTV.text.toString()
@@ -357,11 +390,16 @@ class NewPostFragment : Fragment(){
         locationRequest.interval = 0
         locationRequest.fastestInterval = 0
         locationRequest.numUpdates = 1
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireContext())
-        fusedLocationProviderClient!!.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireContext())
+        fusedLocationProviderClient!!.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.myLooper()
+        )
     }
 
-    private val locationCallback = object: LocationCallback() {
+    private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(p0: LocationResult?) {
             var location: Location = p0!!.lastLocation
             currLocationTV.text = getCityAndCountry(location.latitude, location.longitude)
@@ -382,17 +420,23 @@ class NewPostFragment : Fragment(){
 
 
     private fun clearLocation() {
-        if (currLocationTV.text != ">") {
-            currLocationTV.setOnLongClickListener {
-                val clearLocationView = LayoutInflater.from(requireContext()).inflate(R.layout.clear_location_alert, null)
+
+
+        currLocationTV.setOnLongClickListener {
+            if (currLocationTV.text.toString() != ">") {
+                Log.d(javaClass.simpleName, "location tv is long clicked")
+                val clearLocationView = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.clear_location_alert, null)
                 val dialogueBuilder = AlertDialog.Builder(requireContext())
                 dialogueBuilder.setCancelable(false)
                     .setView(clearLocationView)
                 val alert = dialogueBuilder.create()
                 alert.show()
 
-                val clearLocationConfirmBut = clearLocationView.findViewById<Button>(R.id.clearLocationConfirmBut)
-                val clearLocationCancelBut = clearLocationView.findViewById<Button>(R.id.clearLocationCancelBut)
+                val clearLocationConfirmBut =
+                    clearLocationView.findViewById<Button>(R.id.clearLocationConfirmBut)
+                val clearLocationCancelBut =
+                    clearLocationView.findViewById<Button>(R.id.clearLocationCancelBut)
                 clearLocationConfirmBut.setOnClickListener {
                     address = ""
 
@@ -402,9 +446,11 @@ class NewPostFragment : Fragment(){
                 clearLocationCancelBut.setOnClickListener {
                     alert.cancel()
                 }
-                true
             }
+
+            true
         }
+
     }
 
 

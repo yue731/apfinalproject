@@ -85,6 +85,7 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
             }
         }
         fun bind(post: Post) {
+            
             Log.d(javaClass.simpleName, "trying to bind post for ${post.ownerUid}")
             bindPic1(post.pictureUUIDs)
             post.timeStamp?.let {
@@ -101,7 +102,11 @@ class PostsAdapter(private val viewModel: MainViewModel, private val viewPost: (
             // XXX bind likes
 
             viewModel.fetchOnePostLikes(post.postID, likesCount)
-            viewModel.fetchUserLikedPostsAndBind(viewModel.observeUser().value!!.uid, post, likeIcon)
+
+            if (viewModel.observeUser().value != null) {
+                viewModel.fetchUserLikedPostsAndBind(viewModel.observeUser().value!!.uid, post, likeIcon)
+            }
+
 
         }
     }
